@@ -5,9 +5,11 @@ import HealthBadge from "@/components/HealthBadge";
 
 describe("HealthBadge", () => {
   it("shows 'Checking...' initially then 'API healthy' on ok response", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ status: "ok", service: "sleuthgraph-api" }), { status: 200 }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ status: "ok", service: "sleuthgraph-api" }), { status: 200 }),
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     render(<HealthBadge />);
