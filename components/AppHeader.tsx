@@ -43,6 +43,16 @@ export default function AppHeader() {
         <Group gap="sm">
           {!loading && user && (
             <>
+              <Anchor
+                component={Link}
+                href="/cases"
+                size="sm"
+                fw={500}
+                c="investigatorBlue.4"
+                underline="never"
+              >
+                Cases
+              </Anchor>
               <Badge color="investigatorBlue" variant="light" size="sm">
                 {user.email}
               </Badge>
