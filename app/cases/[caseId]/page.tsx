@@ -49,12 +49,11 @@ interface EditFormValues {
   tags: string[];
 }
 
-export default function CaseDetailPage({
-  params,
-}: {
-  params: Promise<{ caseId: string }>;
-}) {
-  const { caseId } = use(params);
+interface CaseDetailContentProps {
+  caseId: string;
+}
+
+function CaseDetailContent({ caseId }: CaseDetailContentProps) {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -352,3 +351,20 @@ export default function CaseDetailPage({
     </Stack>
   );
 }
+
+/**
+ * Next.js 16 page component: params is a Promise in Client Components.
+ * We use React.use() to unwrap it, then delegate to CaseDetailContent
+ * which holds all the state and effects.
+ */
+export default function CaseDetailPage({
+  params,
+}: {
+  params: Promise<{ caseId: string }>;
+}) {
+  const { caseId } = use(params);
+  return <CaseDetailContent caseId={caseId} />;
+}
+
+// Export the inner component for unit testing without the params Promise
+export { CaseDetailContent };
