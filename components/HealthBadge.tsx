@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+import { Badge, Tooltip } from "@mantine/core";
+import { IconCircleFilled } from "@tabler/icons-react";
+
 import { apiClient } from "@/lib/api";
 
 type State = "checking" | "ok" | "error";
@@ -18,19 +21,18 @@ export default function HealthBadge() {
 
   const label =
     state === "checking" ? "Checking..." : state === "ok" ? "API healthy" : "API unreachable";
-  const color =
-    state === "checking"
-      ? "bg-gray-200 text-gray-700"
-      : state === "ok"
-        ? "bg-green-100 text-green-800"
-        : "bg-red-100 text-red-800";
+  const color = state === "checking" ? "gray" : state === "ok" ? "green" : "red";
 
   return (
-    <span
-      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${color}`}
-    >
-      <span className="h-2 w-2 rounded-full bg-current" />
-      {label}
-    </span>
+    <Tooltip label={state === "ok" ? "Backend is reachable" : "Cannot reach backend"} withArrow>
+      <Badge
+        color={color}
+        variant="light"
+        leftSection={<IconCircleFilled size={8} />}
+        aria-label={`API status: ${label}`}
+      >
+        {label}
+      </Badge>
+    </Tooltip>
   );
 }
