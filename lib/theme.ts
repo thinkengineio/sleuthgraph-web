@@ -34,7 +34,6 @@ export const theme = createTheme({
     investigatorBlue,
     amber,
   },
-  defaultColorScheme: "dark",
   fontFamily:
     "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
   fontFamilyMonospace:
