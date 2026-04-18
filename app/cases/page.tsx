@@ -22,13 +22,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import {
-  IconArchive,
-  IconFolder,
-  IconFolderOpen,
-  IconPlus,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconArchive, IconFolder, IconFolderOpen, IconPlus, IconTrash } from "@tabler/icons-react";
 
 import { Case, CaseCreate, createCase, deleteCase, listCases, updateCase } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
@@ -215,11 +209,7 @@ export default function CasesListPage() {
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <Title order={3}>Cases</Title>
-          <Button
-            leftSection={<IconPlus size={14} />}
-            size="sm"
-            onClick={() => setModalOpen(true)}
-          >
+          <Button leftSection={<IconPlus size={14} />} size="sm" onClick={() => setModalOpen(true)}>
             New case
           </Button>
         </Group>

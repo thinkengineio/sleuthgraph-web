@@ -252,11 +252,7 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
       {/* Case title + status badge */}
       <Group align="center" gap="sm">
         <Title order={3}>{caseData.name}</Title>
-        <Badge
-          color={caseData.status === "active" ? "green" : "gray"}
-          variant="light"
-          size="sm"
-        >
+        <Badge color={caseData.status === "active" ? "green" : "gray"} variant="light" size="sm">
           {caseData.status}
         </Badge>
       </Group>
@@ -265,11 +261,7 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
       <Card withBorder>
         <form onSubmit={form.onSubmit(handleSave)} noValidate>
           <Stack gap="sm">
-            <TextInput
-              label="Name"
-              required
-              {...form.getInputProps("name")}
-            />
+            <TextInput label="Name" required {...form.getInputProps("name")} />
             <Select
               label="Status"
               data={[
@@ -287,12 +279,20 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
             {/* Timestamps */}
             <Group gap="xl" mt="xs">
               <Stack gap={2}>
-                <Text size="xs" c="dimmed">Created</Text>
-                <Text size="xs" ff="monospace">{formatTs(caseData.created_at)}</Text>
+                <Text size="xs" c="dimmed">
+                  Created
+                </Text>
+                <Text size="xs" ff="monospace">
+                  {formatTs(caseData.created_at)}
+                </Text>
               </Stack>
               <Stack gap={2}>
-                <Text size="xs" c="dimmed">Updated</Text>
-                <Text size="xs" ff="monospace">{formatTs(caseData.updated_at)}</Text>
+                <Text size="xs" c="dimmed">
+                  Updated
+                </Text>
+                <Text size="xs" ff="monospace">
+                  {formatTs(caseData.updated_at)}
+                </Text>
               </Stack>
             </Group>
 
@@ -341,8 +341,12 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
       <Card withBorder>
         <Stack gap="xs">
           <Group align="center" gap="xs">
-            <Title order={5} c="dimmed">Entities (0)</Title>
-            <Badge color="gray" variant="dot" size="sm">coming next</Badge>
+            <Title order={5} c="dimmed">
+              Entities (0)
+            </Title>
+            <Badge color="gray" variant="dot" size="sm">
+              coming next
+            </Badge>
           </Group>
           <Text size="sm" c="dimmed">
             Entity graph — coming in the next frontend task.
@@ -358,11 +362,7 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
  * We use React.use() to unwrap it, then delegate to CaseDetailContent
  * which holds all the state and effects.
  */
-export default function CaseDetailPage({
-  params,
-}: {
-  params: Promise<{ caseId: string }>;
-}) {
+export default function CaseDetailPage({ params }: { params: Promise<{ caseId: string }> }) {
   const { caseId } = use(params);
   return <CaseDetailContent caseId={caseId} />;
 }

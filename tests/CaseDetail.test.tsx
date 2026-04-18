@@ -87,9 +87,7 @@ describe("CaseDetailPage", () => {
     renderWithMantine(<CaseDetailContent caseId="nonexistent" />);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/case not found or you don.t have access/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/case not found or you don.t have access/i)).toBeInTheDocument();
     });
   });
 });

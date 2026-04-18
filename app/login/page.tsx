@@ -111,11 +111,7 @@ export default function LoginPage() {
           {oidcStatus?.enabled === true && (
             <>
               <Divider label="or" labelPosition="center" />
-              <Tooltip
-                label="SSO sign-in is coming in Phase 2.5"
-                withArrow
-                position="bottom"
-              >
+              <Tooltip label="SSO sign-in is coming in Phase 2.5" withArrow position="bottom">
                 <Button
                   variant="default"
                   fullWidth

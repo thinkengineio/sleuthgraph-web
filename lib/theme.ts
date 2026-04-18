@@ -36,8 +36,7 @@ export const theme = createTheme({
   },
   fontFamily:
     "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",
-  fontFamilyMonospace:
-    "var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+  fontFamilyMonospace: "var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
   headings: {
     fontFamily:
       "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif",

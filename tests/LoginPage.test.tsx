@@ -102,9 +102,7 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(notifications.show).toHaveBeenCalledWith(
-        expect.objectContaining({ color: "red" }),
-      );
+      expect(notifications.show).toHaveBeenCalledWith(expect.objectContaining({ color: "red" }));
     });
   });
 

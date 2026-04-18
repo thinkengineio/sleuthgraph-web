@@ -3,14 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import {
-  Anchor,
-  Badge,
-  Button,
-  Group,
-  AppShell,
-  Text,
-} from "@mantine/core";
+import { Anchor, Badge, Button, Group, AppShell, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
 import { useAuth } from "@/lib/AuthContext";
@@ -56,23 +49,13 @@ export default function AppHeader() {
               <Badge color="investigatorBlue" variant="light" size="sm">
                 {user.email}
               </Badge>
-              <Button
-                variant="subtle"
-                color="gray"
-                size="xs"
-                onClick={handleLogout}
-              >
+              <Button variant="subtle" color="gray" size="xs" onClick={handleLogout}>
                 Sign out
               </Button>
             </>
           )}
           {!loading && !user && (
-            <Button
-              component={Link}
-              href="/login"
-              variant="filled"
-              size="xs"
-            >
+            <Button component={Link} href="/login" variant="filled" size="xs">
               Sign in
             </Button>
           )}
