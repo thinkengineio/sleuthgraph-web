@@ -108,7 +108,7 @@ export default function LoginPage() {
             </Stack>
           </form>
 
-          {oidcStatus !== null && (
+          {oidcStatus?.enabled === true && (
             <>
               <Divider label="or" labelPosition="center" />
               <Tooltip
