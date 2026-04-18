@@ -6,29 +6,25 @@ import { renderWithMantine } from "./test-utils";
 import type { Case } from "@/lib/api";
 
 // Hoist everything that's needed inside vi.mock factories
-const {
-  listCasesMock,
-  createCaseMock,
-  updateCaseMock,
-  deleteCaseMock,
-  STABLE_USER,
-} = vi.hoisted(() => {
-  const STABLE_USER = {
-    id: "u1",
-    email: "admin@local.dev",
-    is_active: true,
-    is_superuser: true,
-    is_verified: true,
-    name: null as string | null,
-  };
-  return {
-    listCasesMock: vi.fn(),
-    createCaseMock: vi.fn(),
-    updateCaseMock: vi.fn(),
-    deleteCaseMock: vi.fn(),
-    STABLE_USER,
-  };
-});
+const { listCasesMock, createCaseMock, updateCaseMock, deleteCaseMock, STABLE_USER } = vi.hoisted(
+  () => {
+    const STABLE_USER = {
+      id: "u1",
+      email: "admin@local.dev",
+      is_active: true,
+      is_superuser: true,
+      is_verified: true,
+      name: null as string | null,
+    };
+    return {
+      listCasesMock: vi.fn(),
+      createCaseMock: vi.fn(),
+      updateCaseMock: vi.fn(),
+      deleteCaseMock: vi.fn(),
+      STABLE_USER,
+    };
+  },
+);
 
 // Mock next/navigation
 const pushMock = vi.fn();
@@ -120,7 +116,7 @@ describe("CasesListPage", () => {
     const created: Case = { ...CASE_FIXTURE, id: "c2", name: "Test Case" };
 
     listCasesMock
-      .mockResolvedValueOnce([])        // initial load
+      .mockResolvedValueOnce([]) // initial load
       .mockResolvedValueOnce([created]); // refresh after create
 
     createCaseMock.mockResolvedValue(created);
