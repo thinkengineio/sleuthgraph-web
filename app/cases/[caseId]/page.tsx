@@ -106,9 +106,10 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
 
   useEffect(() => {
     if (!authLoading && user) {
+      // One-shot data fetch on mount; setState inside async effect is intentional.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchCase();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user, caseId]);
 
   async function handleSave(values: EditFormValues) {
