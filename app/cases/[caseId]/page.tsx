@@ -110,6 +110,8 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchCase();
     }
+    // fetchCase is intentionally omitted from deps to avoid re-fetch loops.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user, caseId]);
 
   async function handleSave(values: EditFormValues) {
