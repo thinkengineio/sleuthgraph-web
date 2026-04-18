@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import HealthBadge from "@/components/HealthBadge";
+import { renderWithMantine } from "./test-utils";
 
 describe("HealthBadge", () => {
   it("shows 'Checking...' initially then 'API healthy' on ok response", async () => {
@@ -12,7 +13,7 @@ describe("HealthBadge", () => {
       );
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<HealthBadge />);
+    renderWithMantine(<HealthBadge />);
     expect(screen.getByText(/checking/i)).toBeInTheDocument();
 
     await waitFor(() => {
@@ -24,7 +25,7 @@ describe("HealthBadge", () => {
 
   it("shows 'API unreachable' on error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("net")));
-    render(<HealthBadge />);
+    renderWithMantine(<HealthBadge />);
     await waitFor(() => {
       expect(screen.getByText(/api unreachable/i)).toBeInTheDocument();
     });
