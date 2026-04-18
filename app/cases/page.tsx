@@ -88,9 +88,10 @@ export default function CasesListPage() {
 
   useEffect(() => {
     if (!authLoading && user) {
+      // One-shot data fetch on mount; setState inside async effect is intentional.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchCases();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user]);
 
   async function handleCreate(values: CreateFormValues) {
