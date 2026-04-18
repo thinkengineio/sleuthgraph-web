@@ -82,3 +82,115 @@ export async function apiLogin(email: string, password: string): Promise<Respons
     body: body.toString(),
   });
 }
+
+// ──────────────────────────────────────────────
+// Case types + CRUD helpers
+// ──────────────────────────────────────────────
+
+export type CaseStatus = "active" | "archived";
+
+export type Case = {
+  id: string;
+  owner_id: string;
+  name: string;
+  status: CaseStatus;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type CaseCreate = {
+  name: string;
+  tags?: string[];
+};
+
+export type CaseUpdate = {
+  name?: string;
+  status?: CaseStatus;
+  tags?: string[];
+};
+
+export type ListCasesParams = {
+  status?: CaseStatus;
+  limit?: number;
+  offset?: number;
+};
+
+/**
+ * GET /cases — list cases (owned by current user).
+ * Throws on non-2xx.
+ */
+export async function listCases(params?: ListCasesParams): Promise<Case[]> {
+  const qs = new URLSearchParams();
+  if (params?.status) qs.set("status", params.status);
+  if (params?.limit != null) qs.set("limit", String(params.limit));
+  if (params?.offset != null) qs.set("offset", String(params.offset));
+  const query = qs.toString();
+  const res = await apiFetch(`/cases${query ? `?${query}` : ""}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as Case[];
+}
+
+/**
+ * POST /cases — create a new case.
+ * Returns the created CaseRead.
+ */
+export async function createCase(data: CaseCreate): Promise<Case> {
+  const res = await apiFetch("/cases", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as Case;
+}
+
+/**
+ * GET /cases/{id} — fetch a single case.
+ * Returns null on 404.
+ */
+export async function getCase(id: string): Promise<Case | null> {
+  const res = await apiFetch(`/cases/${id}`);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as Case;
+}
+
+/**
+ * PATCH /cases/{id} — partial update.
+ * Returns null on 404.
+ */
+export async function updateCase(id: string, data: CaseUpdate): Promise<Case | null> {
+  const res = await apiFetch(`/cases/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as Case;
+}
+
+/**
+ * DELETE /cases/{id} — delete a case.
+ * Returns true on 204, null on 404.
+ */
+export async function deleteCase(id: string): Promise<true | null> {
+  const res = await apiFetch(`/cases/${id}`, { method: "DELETE" });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return true;
+}
