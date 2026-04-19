@@ -21,7 +21,6 @@ interface RelationshipPanelProps {
 export function RelationshipPanel({ caseId, entities }: RelationshipPanelProps) {
   const [items, setItems] = useState<RelationshipRead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [detailRel, setDetailRel] = useState<RelationshipRead | null>(null);
@@ -44,10 +43,10 @@ export function RelationshipPanel({ caseId, entities }: RelationshipPanelProps) 
   }, [caseId]);
 
   useEffect(() => {
-    // One-shot fetch on mount + when refreshKey changes; setState inside async effect is intentional.
+    // One-shot fetch on mount; setState inside async effect is intentional.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRelationships();
-  }, [fetchRelationships, refreshKey]);
+  }, [fetchRelationships]);
 
   function handleCreated(rel: RelationshipRead) {
     setItems((prev) => [...prev, rel]);

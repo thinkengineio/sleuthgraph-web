@@ -3,7 +3,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { RelationshipCreateModal } from "@/components/RelationshipCreateModal";
 import { renderWithMantine } from "./test-utils";
-import type { EntityRead, RelationshipRead } from "@/lib/api";
+import type { EntityRead } from "@/lib/api";
 
 const { createRelationshipMock, notifShowMock } = vi.hoisted(() => ({
   createRelationshipMock: vi.fn(),
@@ -39,18 +39,6 @@ const ENTITY_B: EntityRead = {
   attrs: {},
   created_at: "2026-04-17T10:00:00Z",
   updated_at: "2026-04-17T10:00:00Z",
-};
-
-const REL_RESULT: RelationshipRead = {
-  id: "rel-001",
-  case_id: "c1",
-  src_entity_id: "ent-aaa",
-  dst_entity_id: "ent-bbb",
-  rel_type: "OWNS",
-  confidence: 1.0,
-  source_plugin: null,
-  attrs: {},
-  created_at: "2026-04-17T12:00:00Z",
 };
 
 const ENTITIES = [ENTITY_A, ENTITY_B];

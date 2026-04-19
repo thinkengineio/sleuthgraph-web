@@ -22,7 +22,6 @@ interface EntityPanelProps {
 export function EntityPanel({ caseId, onEntitiesChange }: EntityPanelProps) {
   const [items, setItems] = useState<EntityRead[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [detailEntity, setDetailEntity] = useState<EntityRead | null>(null);
@@ -46,10 +45,10 @@ export function EntityPanel({ caseId, onEntitiesChange }: EntityPanelProps) {
   }, [caseId, onEntitiesChange]);
 
   useEffect(() => {
-    // One-shot fetch on mount + when refreshKey changes; setState inside async effect is intentional.
+    // One-shot fetch on mount; setState inside async effect is intentional.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchEntities();
-  }, [fetchEntities, refreshKey]);
+  }, [fetchEntities]);
 
   function handleCreated(entity: EntityRead) {
     const next = [...items, entity];
