@@ -194,3 +194,125 @@ export async function deleteCase(id: string): Promise<true | null> {
   }
   return true;
 }
+
+// ──────────────────────────────────────────────
+// Evidence types + CRUD helpers
+// ──────────────────────────────────────────────
+
+export type Evidence = {
+  id: string;
+  case_id: string;
+  entity_id: string | null;
+  source_plugin: string;
+  query: string;
+  response_hash: string;
+  response_uri: string;
+  response_bytes: number;
+  response_content_type: string | null;
+  timestamp: string;
+  reproducibility_spec: Record<string, unknown>;
+  created_by: string | null;
+  blob_url: string | null;
+};
+
+export type EvidenceList = {
+  items: Evidence[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+export type EvidenceUploadMetadata = {
+  query: string;
+  source_plugin?: string;
+  entity_id?: string;
+  reproducibility_spec?: Record<string, unknown>;
+};
+
+/**
+ * GET /cases/{id}/evidence — list evidence items for a case.
+ */
+export async function listEvidence(
+  caseId: string,
+  opts: {
+    limit?: number;
+    offset?: number;
+    entity_id?: string;
+    source_plugin?: string;
+  } = {},
+): Promise<EvidenceList> {
+  const qs = new URLSearchParams();
+  if (opts.limit != null) qs.set("limit", String(opts.limit));
+  if (opts.offset != null) qs.set("offset", String(opts.offset));
+  if (opts.entity_id) qs.set("entity_id", opts.entity_id);
+  if (opts.source_plugin) qs.set("source_plugin", opts.source_plugin);
+  const query = qs.toString();
+  const res = await apiFetch(`/cases/${caseId}/evidence${query ? `?${query}` : ""}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as EvidenceList;
+}
+
+/**
+ * POST /cases/{id}/evidence — upload an evidence file (multipart).
+ * Throws with a user-friendly message on 413 (file exceeds 50 MiB limit).
+ */
+export async function uploadEvidence(
+  caseId: string,
+  file: File,
+  metadata: EvidenceUploadMetadata,
+): Promise<Evidence> {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("metadata", JSON.stringify(metadata));
+  // Do not pass Content-Type header — browser sets multipart boundary automatically.
+  const res = await fetch(`${getApiBaseUrl()}/cases/${caseId}/evidence`, {
+    method: "POST",
+    credentials: "include",
+    body,
+  });
+  if (res.status === 413) {
+    throw new Error("File exceeds the 50 MiB upload limit. Choose a smaller file.");
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Upload failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+  return (await res.json()) as Evidence;
+}
+
+/**
+ * Returns the URL that triggers a 307 redirect to the presigned MinIO blob.
+ * Open in a new tab — browser follows the redirect.
+ */
+export function evidenceBlobUrl(caseId: string, evId: string): string {
+  return `${getApiBaseUrl()}/cases/${caseId}/evidence/${evId}/blob`;
+}
+
+/**
+ * Returns the export URL for the evidence ledger.
+ */
+export function evidenceExportUrl(caseId: string, format: "json" | "csv" = "csv"): string {
+  return `${getApiBaseUrl()}/cases/${caseId}/evidence/export?format=${format}`;
+}
+
+/**
+ * Authenticated CSV export: fetch with cookie credentials → blob → anchor download.
+ * Bare anchor href cannot send cookies, so this must go through fetch.
+ */
+export async function downloadEvidenceCsv(caseId: string): Promise<void> {
+  const res = await fetch(evidenceExportUrl(caseId, "csv"), { credentials: "include" });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Export failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `case-${caseId}-evidence.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
