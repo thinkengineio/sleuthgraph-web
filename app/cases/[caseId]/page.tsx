@@ -32,17 +32,7 @@ import {
 import { Case, CaseStatus, deleteCase, getCase, updateCase } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 import { EvidencePanel } from "@/components/EvidencePanel";
-
-function formatTs(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
+import { formatTs } from "@/lib/format";
 
 interface EditFormValues {
   name: string;
