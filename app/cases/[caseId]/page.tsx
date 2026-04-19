@@ -31,6 +31,7 @@ import {
 
 import { Case, CaseStatus, deleteCase, getCase, updateCase } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
+import { EvidencePanel } from "@/components/EvidencePanel";
 
 function formatTs(iso: string): string {
   return new Date(iso).toLocaleString("en-US", {
@@ -339,19 +340,22 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
         </form>
       </Card>
 
-      {/* Entities placeholder */}
+      {/* Evidence panel */}
+      <EvidencePanel caseId={caseId} />
+
+      {/* Entities coming in a future phase */}
       <Card withBorder>
         <Stack gap="xs">
           <Group align="center" gap="xs">
             <Title order={5} c="dimmed">
-              Entities (0)
+              Entities
             </Title>
             <Badge color="gray" variant="dot" size="sm">
-              coming next
+              coming next phase
             </Badge>
           </Group>
           <Text size="sm" c="dimmed">
-            Entity graph — coming in the next frontend task.
+            Entity graph — planned for the next frontend phase.
           </Text>
         </Stack>
       </Card>

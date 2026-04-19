@@ -7,22 +7,25 @@ import { renderWithMantine } from "./test-utils";
 import type { Case } from "@/lib/api";
 
 // Hoist everything needed inside vi.mock factories
-const { getCaseMock, updateCaseMock, deleteCaseMock, STABLE_USER } = vi.hoisted(() => {
-  const STABLE_USER = {
-    id: "u1",
-    email: "admin@local.dev",
-    is_active: true,
-    is_superuser: true,
-    is_verified: true,
-    name: null as string | null,
-  };
-  return {
-    getCaseMock: vi.fn(),
-    updateCaseMock: vi.fn(),
-    deleteCaseMock: vi.fn(),
-    STABLE_USER,
-  };
-});
+const { getCaseMock, updateCaseMock, deleteCaseMock, listEvidenceMock, STABLE_USER } = vi.hoisted(
+  () => {
+    const STABLE_USER = {
+      id: "u1",
+      email: "admin@local.dev",
+      is_active: true,
+      is_superuser: true,
+      is_verified: true,
+      name: null as string | null,
+    };
+    return {
+      getCaseMock: vi.fn(),
+      updateCaseMock: vi.fn(),
+      deleteCaseMock: vi.fn(),
+      listEvidenceMock: vi.fn(),
+      STABLE_USER,
+    };
+  },
+);
 
 const pushMock = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -51,6 +54,9 @@ vi.mock("@/lib/api", () => ({
   getCase: getCaseMock,
   updateCase: updateCaseMock,
   deleteCase: deleteCaseMock,
+  listEvidence: listEvidenceMock,
+  evidenceBlobUrl: (caseId: string, evId: string) =>
+    `http://localhost:8000/cases/${caseId}/evidence/${evId}/blob`,
 }));
 
 const CASE_FIXTURE: Case = {
@@ -66,6 +72,8 @@ const CASE_FIXTURE: Case = {
 describe("CaseDetailPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: empty evidence list so EvidencePanel doesn't throw
+    listEvidenceMock.mockResolvedValue({ items: [], total: 0, limit: 100, offset: 0 });
   });
 
   it("renders case details from mocked fetch", async () => {
@@ -78,8 +86,10 @@ describe("CaseDetailPage", () => {
 
     expect(screen.getByText("active")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Operation Lighthouse")).toBeInTheDocument();
-    expect(screen.getByText(/entities \(0\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/coming next/i)).toBeInTheDocument();
+    // Evidence panel heading
+    expect(screen.getByText("Evidence")).toBeInTheDocument();
+    // Entities placeholder still present
+    expect(screen.getByText(/coming next phase/i)).toBeInTheDocument();
   });
 
   it("shows 'not found' message on 404", async () => {
