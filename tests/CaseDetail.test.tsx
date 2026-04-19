@@ -7,25 +7,33 @@ import { renderWithMantine } from "./test-utils";
 import type { Case } from "@/lib/api";
 
 // Hoist everything needed inside vi.mock factories
-const { getCaseMock, updateCaseMock, deleteCaseMock, listEvidenceMock, STABLE_USER } = vi.hoisted(
-  () => {
-    const STABLE_USER = {
-      id: "u1",
-      email: "admin@local.dev",
-      is_active: true,
-      is_superuser: true,
-      is_verified: true,
-      name: null as string | null,
-    };
-    return {
-      getCaseMock: vi.fn(),
-      updateCaseMock: vi.fn(),
-      deleteCaseMock: vi.fn(),
-      listEvidenceMock: vi.fn(),
-      STABLE_USER,
-    };
-  },
-);
+const {
+  getCaseMock,
+  updateCaseMock,
+  deleteCaseMock,
+  listEvidenceMock,
+  listEntitiesMock,
+  listRelationshipsMock,
+  STABLE_USER,
+} = vi.hoisted(() => {
+  const STABLE_USER = {
+    id: "u1",
+    email: "admin@local.dev",
+    is_active: true,
+    is_superuser: true,
+    is_verified: true,
+    name: null as string | null,
+  };
+  return {
+    getCaseMock: vi.fn(),
+    updateCaseMock: vi.fn(),
+    deleteCaseMock: vi.fn(),
+    listEvidenceMock: vi.fn(),
+    listEntitiesMock: vi.fn(),
+    listRelationshipsMock: vi.fn(),
+    STABLE_USER,
+  };
+});
 
 const pushMock = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -55,6 +63,8 @@ vi.mock("@/lib/api", () => ({
   updateCase: updateCaseMock,
   deleteCase: deleteCaseMock,
   listEvidence: listEvidenceMock,
+  listEntities: listEntitiesMock,
+  listRelationships: listRelationshipsMock,
   evidenceBlobUrl: (caseId: string, evId: string) =>
     `http://localhost:8000/cases/${caseId}/evidence/${evId}/blob`,
 }));
@@ -72,8 +82,10 @@ const CASE_FIXTURE: Case = {
 describe("CaseDetailPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Default: empty evidence list so EvidencePanel doesn't throw
+    // Default: empty lists so sub-panels don't throw
     listEvidenceMock.mockResolvedValue({ items: [], total: 0, limit: 100, offset: 0 });
+    listEntitiesMock.mockResolvedValue([]);
+    listRelationshipsMock.mockResolvedValue([]);
   });
 
   it("renders case details from mocked fetch", async () => {
@@ -88,8 +100,9 @@ describe("CaseDetailPage", () => {
     expect(screen.getByDisplayValue("Operation Lighthouse")).toBeInTheDocument();
     // Evidence panel heading
     expect(screen.getByText("Evidence")).toBeInTheDocument();
-    // Entities placeholder still present
-    expect(screen.getByText(/coming next phase/i)).toBeInTheDocument();
+    // Entity and Relationship panels now present; placeholder card is gone
+    expect(screen.getByText("Entities")).toBeInTheDocument();
+    expect(screen.getByText("Relationships")).toBeInTheDocument();
   });
 
   it("shows 'not found' message on 404", async () => {
