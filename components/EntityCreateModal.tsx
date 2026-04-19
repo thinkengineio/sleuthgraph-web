@@ -42,12 +42,7 @@ const TYPE_SELECT_DATA = ENTITY_TYPES.map((t) => ({
   label: ENTITY_TYPE_META[t].label,
 }));
 
-export function EntityCreateModal({
-  caseId,
-  opened,
-  onClose,
-  onSuccess,
-}: EntityCreateModalProps) {
+export function EntityCreateModal({ caseId, opened, onClose, onSuccess }: EntityCreateModalProps) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<FormValues>({
@@ -65,8 +60,7 @@ export function EntityCreateModal({
           : v.trim().length > 512
             ? "Label must be 512 characters or fewer"
             : null,
-      confidence: (v) =>
-        v < 0 || v > 1 ? "Confidence must be between 0.0 and 1.0" : null,
+      confidence: (v) => (v < 0 || v > 1 ? "Confidence must be between 0.0 and 1.0" : null),
     },
   });
 

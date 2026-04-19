@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  ActionIcon,
-  Box,
-  CopyButton,
-  Group,
-  Stack,
-  Table,
-  Text,
-  Tooltip,
-} from "@mantine/core";
+import { ActionIcon, Box, CopyButton, Group, Stack, Table, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconClipboard, IconEye, IconTrash } from "@tabler/icons-react";
 
@@ -43,12 +34,7 @@ export function EntityTable({ items, onViewDetail, onDelete }: EntityTableProps)
 
       {/* Label */}
       <Table.Td>
-        <Tooltip
-          label={entity.label}
-          position="top"
-          withArrow
-          disabled={entity.label.length <= 40}
-        >
+        <Tooltip label={entity.label} position="top" withArrow disabled={entity.label.length <= 40}>
           <Text size="sm" truncate="end" maw={200}>
             {entity.label}
           </Text>
@@ -73,7 +59,13 @@ export function EntityTable({ items, onViewDetail, onDelete }: EntityTableProps)
       <Table.Td>
         <CopyButton value={entity.id} timeout={2000}>
           {({ copied, copy }) => (
-            <Tooltip label={copied ? "Copied!" : entity.id} position="top" withArrow maw={420} multiline>
+            <Tooltip
+              label={copied ? "Copied!" : entity.id}
+              position="top"
+              withArrow
+              maw={420}
+              multiline
+            >
               <Group
                 gap={4}
                 style={{ cursor: "pointer" }}

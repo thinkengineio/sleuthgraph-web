@@ -86,9 +86,10 @@ export function EntityDetailDrawer({
     form.setValues({
       label: entity.label,
       confidence: entity.confidence,
-      attrs: entity.attrs && Object.keys(entity.attrs).length > 0
-        ? JSON.stringify(entity.attrs, null, 2)
-        : "",
+      attrs:
+        entity.attrs && Object.keys(entity.attrs).length > 0
+          ? JSON.stringify(entity.attrs, null, 2)
+          : "",
     });
     setEditMode(true);
   }

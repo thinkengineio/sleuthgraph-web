@@ -41,9 +41,7 @@ describe("EntityTable", () => {
   });
 
   it("renders empty state when no items", () => {
-    renderWithMantine(
-      <EntityTable items={[]} onViewDetail={onViewDetail} onDelete={onDelete} />,
-    );
+    renderWithMantine(<EntityTable items={[]} onViewDetail={onViewDetail} onDelete={onDelete} />);
     expect(screen.getByText(/no entities yet/i)).toBeInTheDocument();
   });
 

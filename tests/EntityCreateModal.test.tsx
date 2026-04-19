@@ -40,12 +40,7 @@ describe("EntityCreateModal", () => {
 
   function renderModal() {
     return renderWithMantine(
-      <EntityCreateModal
-        caseId="c1"
-        opened={true}
-        onClose={onClose}
-        onSuccess={onSuccess}
-      />,
+      <EntityCreateModal caseId="c1" opened={true} onClose={onClose} onSuccess={onSuccess} />,
     );
   }
 
