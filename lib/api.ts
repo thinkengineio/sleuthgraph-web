@@ -316,3 +316,212 @@ export async function downloadEvidenceCsv(caseId: string): Promise<void> {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// ──────────────────────────────────────────────
+// Entity types + CRUD helpers
+// ──────────────────────────────────────────────
+
+/** Entity types recognised by the backend (Phase 3). */
+export type EntityType =
+  | "PERSON"
+  | "ORGANIZATION"
+  | "DOMAIN"
+  | "IP_ADDRESS"
+  | "EMAIL"
+  | "PHONE"
+  | "URL"
+  | "CRYPTO_ADDRESS";
+
+export type EntityRead = {
+  id: string;
+  case_id: string;
+  type: EntityType;
+  label: string;
+  confidence: number;
+  attrs: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EntityCreate = {
+  type: EntityType;
+  label: string;
+  confidence?: number;
+  attrs?: Record<string, unknown>;
+};
+
+export type EntityUpdate = {
+  label?: string;
+  confidence?: number;
+  attrs?: Record<string, unknown>;
+};
+
+/**
+ * GET /cases/{caseId}/entities — list entities for a case.
+ */
+export async function listEntities(
+  caseId: string,
+  opts: { type?: EntityType; limit?: number; offset?: number } = {},
+): Promise<EntityRead[]> {
+  const qs = new URLSearchParams();
+  if (opts.type) qs.set("type", opts.type);
+  if (opts.limit != null) qs.set("limit", String(opts.limit));
+  if (opts.offset != null) qs.set("offset", String(opts.offset));
+  const query = qs.toString();
+  const res = await apiFetch(`/cases/${caseId}/entities${query ? `?${query}` : ""}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as EntityRead[];
+}
+
+/**
+ * POST /cases/{caseId}/entities — create a new entity.
+ */
+export async function createEntity(caseId: string, data: EntityCreate): Promise<EntityRead> {
+  const res = await apiFetch(`/cases/${caseId}/entities`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as EntityRead;
+}
+
+/**
+ * PATCH /cases/{caseId}/entities/{entityId} — partial update (type immutable).
+ * Returns null on 404.
+ */
+export async function updateEntity(
+  caseId: string,
+  entityId: string,
+  data: EntityUpdate,
+): Promise<EntityRead | null> {
+  const res = await apiFetch(`/cases/${caseId}/entities/${entityId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as EntityRead;
+}
+
+/**
+ * DELETE /cases/{caseId}/entities/{entityId} — soft-delete.
+ * Returns true on 204, null on 404.
+ */
+export async function deleteEntity(caseId: string, entityId: string): Promise<true | null> {
+  const res = await apiFetch(`/cases/${caseId}/entities/${entityId}`, { method: "DELETE" });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return true;
+}
+
+// ──────────────────────────────────────────────
+// Relationship types + CRUD helpers
+// ──────────────────────────────────────────────
+
+/** Relationship types recognised by the backend (Phase 3). */
+export type RelationshipType =
+  | "OWNS"
+  | "EMPLOYED_BY"
+  | "REGISTERED_BY"
+  | "HOSTED_ON"
+  | "RESOLVES_TO"
+  | "ASSOCIATED_WITH"
+  | "COMMUNICATED_WITH"
+  | "MENTIONS";
+
+export type RelationshipRead = {
+  id: string;
+  case_id: string;
+  src_entity_id: string;
+  dst_entity_id: string;
+  rel_type: RelationshipType;
+  confidence: number;
+  source_plugin: string | null;
+  attrs: Record<string, unknown>;
+  created_at: string;
+};
+
+export type RelationshipCreate = {
+  src_entity_id: string;
+  dst_entity_id: string;
+  rel_type: RelationshipType;
+  confidence?: number;
+  source_plugin?: string;
+  attrs?: Record<string, unknown>;
+};
+
+/**
+ * GET /cases/{caseId}/relationships — list relationships for a case.
+ */
+export async function listRelationships(
+  caseId: string,
+  opts: {
+    rel_type?: RelationshipType;
+    src?: string;
+    dst?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<RelationshipRead[]> {
+  const qs = new URLSearchParams();
+  if (opts.rel_type) qs.set("rel_type", opts.rel_type);
+  if (opts.src) qs.set("src", opts.src);
+  if (opts.dst) qs.set("dst", opts.dst);
+  if (opts.limit != null) qs.set("limit", String(opts.limit));
+  if (opts.offset != null) qs.set("offset", String(opts.offset));
+  const query = qs.toString();
+  const res = await apiFetch(`/cases/${caseId}/relationships${query ? `?${query}` : ""}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as RelationshipRead[];
+}
+
+/**
+ * POST /cases/{caseId}/relationships — create a relationship.
+ * Relationships are immutable after creation (no PATCH endpoint).
+ */
+export async function createRelationship(
+  caseId: string,
+  data: RelationshipCreate,
+): Promise<RelationshipRead> {
+  const res = await apiFetch(`/cases/${caseId}/relationships`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as RelationshipRead;
+}
+
+/**
+ * DELETE /cases/{caseId}/relationships/{relId} — delete a relationship.
+ * Returns true on 204, null on 404.
+ */
+export async function deleteRelationship(
+  caseId: string,
+  relId: string,
+): Promise<true | null> {
+  const res = await apiFetch(`/cases/${caseId}/relationships/${relId}`, { method: "DELETE" });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return true;
+}
