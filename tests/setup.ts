@@ -9,6 +9,12 @@ class ResizeObserverStub {
 }
 window.ResizeObserver = ResizeObserverStub;
 
+// Mantine Combobox tries to call scrollIntoView on list items.
+// jsdom does not implement Element.scrollIntoView, so we stub it.
+if (typeof window !== "undefined" && typeof window.HTMLElement !== "undefined") {
+  window.HTMLElement.prototype.scrollIntoView = function () {};
+}
+
 // Mantine uses window.matchMedia for color scheme detection.
 // jsdom does not implement it, so we stub it here.
 Object.defineProperty(window, "matchMedia", {
