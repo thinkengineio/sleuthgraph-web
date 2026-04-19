@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -30,8 +30,11 @@ import {
 } from "@tabler/icons-react";
 
 import { Case, CaseStatus, deleteCase, getCase, updateCase } from "@/lib/api";
+import type { EntityRead } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 import { EvidencePanel } from "@/components/EvidencePanel";
+import { EntityPanel } from "@/components/EntityPanel";
+import { RelationshipPanel } from "@/components/RelationshipPanel";
 import { formatTs } from "@/lib/format";
 
 interface EditFormValues {
@@ -53,6 +56,13 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // Entity list owned here so RelationshipPanel can receive it without fetching twice.
+  const [entities, setEntities] = useState<EntityRead[]>([]);
+
+  const handleEntitiesChange = useCallback((updated: EntityRead[]) => {
+    setEntities(updated);
+  }, []);
 
   const form = useForm<EditFormValues>({
     initialValues: { name: "", status: "active", tags: [] },
@@ -330,25 +340,14 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
         </form>
       </Card>
 
+      {/* Entity panel — owns the entity list and propagates changes downward */}
+      <EntityPanel caseId={caseId} onEntitiesChange={handleEntitiesChange} />
+
+      {/* Relationship panel — receives entities from above to avoid double-fetch */}
+      <RelationshipPanel caseId={caseId} entities={entities} />
+
       {/* Evidence panel */}
       <EvidencePanel caseId={caseId} />
-
-      {/* Entities coming in a future phase */}
-      <Card withBorder>
-        <Stack gap="xs">
-          <Group align="center" gap="xs">
-            <Title order={5} c="dimmed">
-              Entities
-            </Title>
-            <Badge color="gray" variant="dot" size="sm">
-              coming next phase
-            </Badge>
-          </Group>
-          <Text size="sm" c="dimmed">
-            Entity graph — planned for the next frontend phase.
-          </Text>
-        </Stack>
-      </Card>
     </Stack>
   );
 }
