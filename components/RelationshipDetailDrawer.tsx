@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 
-import {
-  Badge,
-  Box,
-  Button,
-  Divider,
-  Drawer,
-  Group,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Badge, Box, Button, Divider, Drawer, Group, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconTrash, IconX } from "@tabler/icons-react";
 
@@ -195,9 +186,7 @@ export function RelationshipDetailDrawer({
                   wordBreak: "break-all",
                 }}
               >
-                {Object.keys(rel.attrs).length > 0
-                  ? JSON.stringify(rel.attrs, null, 2)
-                  : "{}"}
+                {Object.keys(rel.attrs).length > 0 ? JSON.stringify(rel.attrs, null, 2) : "{}"}
               </pre>
             </Box>
           </DetailRow>

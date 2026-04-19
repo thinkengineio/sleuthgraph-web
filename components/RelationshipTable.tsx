@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Group,
-  Stack,
-  Table,
-  Text,
-  Tooltip,
-} from "@mantine/core";
+import { ActionIcon, Badge, Box, Group, Stack, Table, Text, Tooltip } from "@mantine/core";
 import { IconArrowRight, IconEye, IconTrash } from "@tabler/icons-react";
 
 import type { EntityRead, RelationshipRead } from "@/lib/api";

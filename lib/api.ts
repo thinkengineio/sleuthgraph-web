@@ -513,10 +513,7 @@ export async function createRelationship(
  * DELETE /cases/{caseId}/relationships/{relId} — delete a relationship.
  * Returns true on 204, null on 404.
  */
-export async function deleteRelationship(
-  caseId: string,
-  relId: string,
-): Promise<true | null> {
+export async function deleteRelationship(caseId: string, relId: string): Promise<true | null> {
   const res = await apiFetch(`/cases/${caseId}/relationships/${relId}`, { method: "DELETE" });
   if (res.status === 404) return null;
   if (!res.ok) {
