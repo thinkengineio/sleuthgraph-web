@@ -18,24 +18,7 @@ import { IconCheck, IconClipboard, IconDownload } from "@tabler/icons-react";
 
 import type { Evidence } from "@/lib/api";
 import { evidenceBlobUrl } from "@/lib/api";
-
-function humanBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
-}
-
-function formatTs(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
+import { formatTs, humanBytes } from "@/lib/format";
 
 interface DetailRowProps {
   label: string;
