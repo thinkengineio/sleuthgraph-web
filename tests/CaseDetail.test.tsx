@@ -14,6 +14,8 @@ const {
   listEvidenceMock,
   listEntitiesMock,
   listRelationshipsMock,
+  listPluginsMock,
+  listPluginRunsMock,
   STABLE_USER,
 } = vi.hoisted(() => {
   const STABLE_USER = {
@@ -31,6 +33,8 @@ const {
     listEvidenceMock: vi.fn(),
     listEntitiesMock: vi.fn(),
     listRelationshipsMock: vi.fn(),
+    listPluginsMock: vi.fn(),
+    listPluginRunsMock: vi.fn(),
     STABLE_USER,
   };
 });
@@ -65,6 +69,8 @@ vi.mock("@/lib/api", () => ({
   listEvidence: listEvidenceMock,
   listEntities: listEntitiesMock,
   listRelationships: listRelationshipsMock,
+  listPlugins: listPluginsMock,
+  listPluginRuns: listPluginRunsMock,
   evidenceBlobUrl: (caseId: string, evId: string) =>
     `http://localhost:8000/cases/${caseId}/evidence/${evId}/blob`,
 }));
@@ -86,6 +92,8 @@ describe("CaseDetailPage", () => {
     listEvidenceMock.mockResolvedValue({ items: [], total: 0, limit: 100, offset: 0 });
     listEntitiesMock.mockResolvedValue([]);
     listRelationshipsMock.mockResolvedValue([]);
+    listPluginsMock.mockResolvedValue([]);
+    listPluginRunsMock.mockResolvedValue({ items: [], total: 0, limit: 100, offset: 0 });
   });
 
   it("renders case details from mocked fetch", async () => {
@@ -103,6 +111,8 @@ describe("CaseDetailPage", () => {
     // Entity and Relationship panels now present; placeholder card is gone
     expect(screen.getByText("Entities")).toBeInTheDocument();
     expect(screen.getByText("Relationships")).toBeInTheDocument();
+    // Plugin runs panel
+    expect(screen.getByText("Plugin Runs")).toBeInTheDocument();
   });
 
   it("shows 'not found' message on 404", async () => {
