@@ -187,6 +187,7 @@ export function EntityDetailDrawer({
   }
 
   return (
+    <>
     <Drawer
       opened={opened}
       onClose={() => {
@@ -327,35 +328,32 @@ export function EntityDetailDrawer({
             </>
           )}
 
-          {/* Applicable plugins */}
-          {!editMode && (() => {
-            const applicable = plugins.filter((p) =>
-              p.entity_types_accepted.includes(entity.type),
-            );
-            if (applicable.length === 0) return null;
-            return (
+          {/* Applicable plugins — only shown outside edit mode when at least one plugin matches */}
+          {!editMode &&
+            plugins.filter((p) => p.entity_types_accepted.includes(entity.type)).length > 0 && (
               <>
                 <Divider />
                 <Stack gap="xs">
                   <Text size="xs" c="dimmed" fw={500}>
                     Run plugin
                   </Text>
-                  {applicable.map((p) => (
-                    <Button
-                      key={p.name}
-                      variant="light"
-                      color="violet"
-                      size="xs"
-                      leftSection={<IconPlayerPlay size={13} />}
-                      onClick={() => setRunModalPlugin(p)}
-                    >
-                      {p.name}@{p.version}
-                    </Button>
-                  ))}
+                  {plugins
+                    .filter((p) => p.entity_types_accepted.includes(entity.type))
+                    .map((p) => (
+                      <Button
+                        key={p.name}
+                        variant="light"
+                        color="violet"
+                        size="xs"
+                        leftSection={<IconPlayerPlay size={13} />}
+                        onClick={() => setRunModalPlugin(p)}
+                      >
+                        {p.name}@{p.version}
+                      </Button>
+                    ))}
                 </Stack>
               </>
-            );
-          })()}
+            )}
 
           <Divider />
 
@@ -386,5 +384,6 @@ export function EntityDetailDrawer({
         onPluginRunSuccess?.(result);
       }}
     />
+    </>
   );
 }
