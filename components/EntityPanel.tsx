@@ -25,7 +25,13 @@ interface EntityPanelProps {
   refreshToken?: number;
 }
 
-export function EntityPanel({ caseId, onEntitiesChange, plugins = [], onPluginRunSuccess, refreshToken = 0 }: EntityPanelProps) {
+export function EntityPanel({
+  caseId,
+  onEntitiesChange,
+  plugins = [],
+  onPluginRunSuccess,
+  refreshToken = 0,
+}: EntityPanelProps) {
   const [items, setItems] = useState<EntityRead[]>([]);
   const [loading, setLoading] = useState(true);
 

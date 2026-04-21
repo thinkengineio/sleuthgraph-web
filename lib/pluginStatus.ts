@@ -3,11 +3,7 @@
  * PluginRunsTable, PluginRunDetailDrawer, and RunPluginModal.
  */
 
-import {
-  IconCheck,
-  IconClock,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCheck, IconClock, IconX } from "@tabler/icons-react";
 
 import type { PluginRunStatus } from "@/lib/api";
 
