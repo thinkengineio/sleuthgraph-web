@@ -20,7 +20,7 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
-import { apiFetch, OidcStatus } from "@/lib/api";
+import { apiFetch, AuthConfig, getAuthConfig, OidcStatus } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 
 interface LoginFormValues {
@@ -33,13 +33,17 @@ export default function LoginPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [oidcStatus, setOidcStatus] = useState<OidcStatus | null>(null);
+  const [authConfig, setAuthConfig] = useState<AuthConfig | null>(null);
 
-  // Check OIDC availability on mount
+  // Check OIDC availability + auth config on mount
   useEffect(() => {
     apiFetch("/auth/oidc-status")
       .then((res) => (res.ok ? res.json() : null))
       .then((data: OidcStatus | null) => setOidcStatus(data))
       .catch(() => setOidcStatus(null));
+    getAuthConfig()
+      .then((c) => setAuthConfig(c))
+      .catch(() => setAuthConfig(null));
   }, []);
 
   const form = useForm<LoginFormValues>({
@@ -123,6 +127,23 @@ export default function LoginPage() {
                 </Button>
               </Tooltip>
             </>
+          )}
+
+          {authConfig?.password_reset_enabled === true && (
+            <Text size="xs" c="dimmed" ta="center">
+              <Anchor component={Link} href="/forgot-password" size="xs">
+                Forgot your password?
+              </Anchor>
+            </Text>
+          )}
+
+          {authConfig?.signup_enabled === true && (
+            <Text size="xs" c="dimmed" ta="center">
+              Don&apos;t have an account?{" "}
+              <Anchor component={Link} href="/register" size="xs">
+                Register
+              </Anchor>
+            </Text>
           )}
 
           <Text size="xs" c="dimmed" ta="center">
