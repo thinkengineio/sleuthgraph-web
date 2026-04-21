@@ -33,6 +33,69 @@ export type OidcStatus = {
   issuer?: string;
 };
 
+export type AuthConfig = {
+  signup_enabled: boolean;
+  password_reset_enabled: boolean;
+  email_verify_enabled: boolean;
+  oidc_enabled: boolean;
+};
+
+export async function getAuthConfig(): Promise<AuthConfig> {
+  return request<AuthConfig>("/auth/config");
+}
+
+export async function apiRegister(email: string, password: string, name?: string): Promise<UserMe> {
+  const res = await fetch(`${getApiBaseUrl()}/auth/register`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email,
+      password,
+      ...(name ? { name } : {}),
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    let friendly = `HTTP ${res.status}`;
+    if (res.status === 404) friendly = "Registration is disabled on this server.";
+    else if (res.status === 400) friendly = "That email is already registered.";
+    else if (res.status === 422) friendly = "Check the form: email format and password ≥ 8 chars.";
+    throw new Error(`${friendly}${body ? ` — ${body.slice(0, 200)}` : ""}`);
+  }
+  return (await res.json()) as UserMe;
+}
+
+export async function apiForgotPassword(email: string): Promise<void> {
+  // Always treat non-5xx as "sent" to avoid leaking account existence.
+  const res = await fetch(`${getApiBaseUrl()}/auth/forgot-password`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (res.status >= 500) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Server error ${res.status}${body ? ` — ${body.slice(0, 200)}` : ""}`);
+  }
+}
+
+export async function apiResetPassword(token: string, password: string): Promise<void> {
+  const res = await fetch(`${getApiBaseUrl()}/auth/reset-password`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, password }),
+  });
+  if (!res.ok) {
+    if (res.status === 400) {
+      throw new Error("Invalid or expired reset link. Request a new one.");
+    }
+    const body = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}${body ? ` — ${body.slice(0, 200)}` : ""}`);
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${getApiBaseUrl()}${path}`, {
     ...init,
