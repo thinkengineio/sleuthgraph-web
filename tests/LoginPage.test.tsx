@@ -31,20 +31,38 @@ vi.mock("@/lib/AuthContext", () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// Mock getAuthConfig so the new login page effect has a stable signal source.
+const { getAuthConfigMock } = vi.hoisted(() => ({ getAuthConfigMock: vi.fn() }));
+vi.mock("@/lib/api", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/api")>("@/lib/api");
+  return { ...actual, getAuthConfig: getAuthConfigMock };
+});
+
 describe("LoginPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Default: OIDC status returns enabled=false
+    // Default: OIDC status returns enabled=false.  mockImplementation so each
+    // call gets a fresh Response (body streams are single-use).
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ enabled: false }), {
-          status: 200,
-          headers: { "content-type": "application/json" },
-        }),
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ enabled: false }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        ),
       ),
     );
+
+    // Default: auth config — all features off.
+    getAuthConfigMock.mockResolvedValue({
+      signup_enabled: false,
+      password_reset_enabled: false,
+      email_verify_enabled: false,
+      oidc_enabled: false,
+    });
   });
 
   it("renders email and password inputs", async () => {
@@ -109,11 +127,13 @@ describe("LoginPage", () => {
   it("shows SSO button as disabled when OIDC is enabled", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ enabled: true, issuer: "https://sso.example.com" }), {
-          status: 200,
-          headers: { "content-type": "application/json" },
-        }),
+      vi.fn().mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify({ enabled: true, issuer: "https://sso.example.com" }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+        ),
       ),
     );
 
@@ -123,5 +143,46 @@ describe("LoginPage", () => {
       const ssoBtn = screen.getByRole("button", { name: /sign in with sso/i });
       expect(ssoBtn).toBeDisabled();
     });
+  });
+
+  it("renders 'Forgot password?' link when password_reset_enabled=true", async () => {
+    getAuthConfigMock.mockResolvedValue({
+      signup_enabled: false,
+      password_reset_enabled: true,
+      email_verify_enabled: false,
+      oidc_enabled: false,
+    });
+    renderWithMantine(<LoginPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: /forgot your password/i })).toBeInTheDocument();
+    });
+  });
+
+  it("renders 'Register' link when signup_enabled=true", async () => {
+    getAuthConfigMock.mockResolvedValue({
+      signup_enabled: true,
+      password_reset_enabled: false,
+      email_verify_enabled: false,
+      oidc_enabled: false,
+    });
+    renderWithMantine(<LoginPage />);
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: /^register$/i })).toBeInTheDocument();
+    });
+  });
+
+  it("hides forgot/register links when both features are disabled", async () => {
+    getAuthConfigMock.mockResolvedValue({
+      signup_enabled: false,
+      password_reset_enabled: false,
+      email_verify_enabled: false,
+      oidc_enabled: false,
+    });
+    renderWithMantine(<LoginPage />);
+    // After mount + effect resolution
+    await waitFor(() => {
+      expect(screen.queryByRole("link", { name: /forgot your password/i })).not.toBeInTheDocument();
+    });
+    expect(screen.queryByRole("link", { name: /^register$/i })).not.toBeInTheDocument();
   });
 });
