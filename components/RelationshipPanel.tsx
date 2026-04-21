@@ -16,9 +16,11 @@ interface RelationshipPanelProps {
   caseId: string;
   /** Entity list owned by the parent (EntityPanel fetches it once). */
   entities: EntityRead[];
+  /** Bump to re-fetch relationships (e.g. after a plugin run creates new ones). */
+  refreshToken?: number;
 }
 
-export function RelationshipPanel({ caseId, entities }: RelationshipPanelProps) {
+export function RelationshipPanel({ caseId, entities, refreshToken = 0 }: RelationshipPanelProps) {
   const [items, setItems] = useState<RelationshipRead[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,10 +45,10 @@ export function RelationshipPanel({ caseId, entities }: RelationshipPanelProps) 
   }, [caseId]);
 
   useEffect(() => {
-    // One-shot fetch on mount; setState inside async effect is intentional.
+    // Re-fetch on mount and whenever refreshToken changes.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRelationships();
-  }, [fetchRelationships]);
+  }, [fetchRelationships, refreshToken]);
 
   function handleCreated(rel: RelationshipRead) {
     setItems((prev) => [...prev, rel]);

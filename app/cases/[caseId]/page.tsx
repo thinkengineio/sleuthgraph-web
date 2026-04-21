@@ -29,11 +29,12 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 
-import { Case, CaseStatus, deleteCase, getCase, updateCase } from "@/lib/api";
-import type { EntityRead } from "@/lib/api";
+import { Case, CaseStatus, deleteCase, getCase, listPlugins, updateCase } from "@/lib/api";
+import type { EntityRead, PluginInfo, PluginRunResponse } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 import { EvidencePanel } from "@/components/EvidencePanel";
 import { EntityPanel } from "@/components/EntityPanel";
+import { PluginRunsPanel } from "@/components/PluginRunsPanel";
 import { RelationshipPanel } from "@/components/RelationshipPanel";
 import { formatTs } from "@/lib/format";
 
@@ -59,10 +60,18 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
 
   // Entity list owned here so RelationshipPanel can receive it without fetching twice.
   const [entities, setEntities] = useState<EntityRead[]>([]);
+  // Plugin list fetched once; passed down to EntityPanel → EntityDetailDrawer.
+  const [plugins, setPlugins] = useState<PluginInfo[]>([]);
+  // Bump to trigger re-fetch in all panels after a successful plugin run.
+  const [refreshToken, setRefreshToken] = useState(0);
 
   const handleEntitiesChange = useCallback((updated: EntityRead[]) => {
     setEntities(updated);
   }, []);
+
+  function handlePluginRunSuccess(_result: PluginRunResponse) {
+    setRefreshToken((t) => t + 1);
+  }
 
   const form = useForm<EditFormValues>({
     initialValues: { name: "", status: "active", tags: [] },
@@ -341,13 +350,22 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
       </Card>
 
       {/* Entity panel — owns the entity list and propagates changes downward */}
-      <EntityPanel caseId={caseId} onEntitiesChange={handleEntitiesChange} />
+      <EntityPanel
+        caseId={caseId}
+        onEntitiesChange={handleEntitiesChange}
+        plugins={plugins}
+        onPluginRunSuccess={handlePluginRunSuccess}
+        refreshToken={refreshToken}
+      />
 
       {/* Relationship panel — receives entities from above to avoid double-fetch */}
-      <RelationshipPanel caseId={caseId} entities={entities} />
+      <RelationshipPanel caseId={caseId} entities={entities} refreshToken={refreshToken} />
 
       {/* Evidence panel */}
-      <EvidencePanel caseId={caseId} />
+      <EvidencePanel caseId={caseId} refreshToken={refreshToken} />
+
+      {/* Plugin runs panel */}
+      <PluginRunsPanel caseId={caseId} refreshToken={refreshToken} />
     </Stack>
   );
 }

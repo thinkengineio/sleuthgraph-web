@@ -14,9 +14,11 @@ import { EvidenceUploadModal } from "./EvidenceUploadModal";
 
 interface EvidencePanelProps {
   caseId: string;
+  /** Bump to re-fetch evidence (e.g. after a plugin run creates new evidence). */
+  refreshToken?: number;
 }
 
-export function EvidencePanel({ caseId }: EvidencePanelProps) {
+export function EvidencePanel({ caseId, refreshToken = 0 }: EvidencePanelProps) {
   const [items, setItems] = useState<Evidence[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -45,10 +47,10 @@ export function EvidencePanel({ caseId }: EvidencePanelProps) {
   }, [caseId]);
 
   useEffect(() => {
-    // One-shot fetch on mount + when refreshKey changes; setState inside async effect is intentional.
+    // Re-fetch on mount, when internal refreshKey changes (upload), or external refreshToken changes (plugin run).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchEvidence();
-  }, [fetchEvidence, refreshKey]);
+  }, [fetchEvidence, refreshKey, refreshToken]);
 
   function handleUploadSuccess() {
     setRefreshKey((k) => k + 1);
