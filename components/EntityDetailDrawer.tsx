@@ -16,12 +16,13 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconDeviceFloppy, IconPencil, IconTrash, IconX } from "@tabler/icons-react";
+import { IconCheck, IconDeviceFloppy, IconPencil, IconPlayerPlay, IconTrash, IconX } from "@tabler/icons-react";
 
-import type { EntityRead } from "@/lib/api";
+import type { EntityRead, PluginInfo, PluginRunResponse } from "@/lib/api";
 import { deleteEntity, updateEntity } from "@/lib/api";
 import { formatTs } from "@/lib/format";
 import { EntityTypeBadge } from "./EntityTypeBadge";
+import { RunPluginModal } from "./RunPluginModal";
 
 interface DetailRowProps {
   label: string;
@@ -51,6 +52,10 @@ interface EntityDetailDrawerProps {
   onClose: () => void;
   onUpdated: (entity: EntityRead) => void;
   onDeleted: (entityId: string) => void;
+  /** List of all plugins fetched once at case-detail level. */
+  plugins?: PluginInfo[];
+  /** Called when a plugin run succeeds so parent can bump refreshToken. */
+  onPluginRunSuccess?: (result: PluginRunResponse) => void;
 }
 
 export function EntityDetailDrawer({
@@ -59,10 +64,13 @@ export function EntityDetailDrawer({
   onClose,
   onUpdated,
   onDeleted,
+  plugins = [],
+  onPluginRunSuccess,
 }: EntityDetailDrawerProps) {
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [runModalPlugin, setRunModalPlugin] = useState<PluginInfo | null>(null);
 
   const form = useForm<EditFormValues>({
     initialValues: {
@@ -319,6 +327,36 @@ export function EntityDetailDrawer({
             </>
           )}
 
+          {/* Applicable plugins */}
+          {!editMode && (() => {
+            const applicable = plugins.filter((p) =>
+              p.entity_types_accepted.includes(entity.type),
+            );
+            if (applicable.length === 0) return null;
+            return (
+              <>
+                <Divider />
+                <Stack gap="xs">
+                  <Text size="xs" c="dimmed" fw={500}>
+                    Run plugin
+                  </Text>
+                  {applicable.map((p) => (
+                    <Button
+                      key={p.name}
+                      variant="light"
+                      color="violet"
+                      size="xs"
+                      leftSection={<IconPlayerPlay size={13} />}
+                      onClick={() => setRunModalPlugin(p)}
+                    >
+                      {p.name}@{p.version}
+                    </Button>
+                  ))}
+                </Stack>
+              </>
+            );
+          })()}
+
           <Divider />
 
           {/* Delete */}
@@ -336,5 +374,17 @@ export function EntityDetailDrawer({
         </Stack>
       )}
     </Drawer>
+
+    {/* Run plugin modal — launched from applicable-plugins section */}
+    <RunPluginModal
+      opened={runModalPlugin !== null}
+      entity={entity}
+      plugin={runModalPlugin}
+      onClose={() => setRunModalPlugin(null)}
+      onSuccess={(result) => {
+        setRunModalPlugin(null);
+        onPluginRunSuccess?.(result);
+      }}
+    />
   );
 }
