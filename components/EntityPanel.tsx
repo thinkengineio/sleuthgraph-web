@@ -6,7 +6,7 @@ import { Button, Card, Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlus, IconX } from "@tabler/icons-react";
 
-import type { EntityRead } from "@/lib/api";
+import type { EntityRead, PluginInfo, PluginRunResponse } from "@/lib/api";
 import { deleteEntity, listEntities } from "@/lib/api";
 import { EntityCreateModal } from "./EntityCreateModal";
 import { EntityDetailDrawer } from "./EntityDetailDrawer";
@@ -17,9 +17,21 @@ interface EntityPanelProps {
   /** Called whenever the entity list changes so the parent can update
    *  any downstream panels (e.g. RelationshipPanel) that depend on the list. */
   onEntitiesChange?: (entities: EntityRead[]) => void;
+  /** Plugin list fetched once at case-detail level; passed down to EntityDetailDrawer. */
+  plugins?: PluginInfo[];
+  /** Called when a plugin run succeeds; parent bumps refreshToken. */
+  onPluginRunSuccess?: (result: PluginRunResponse) => void;
+  /** Bump to re-fetch entities (e.g. after a plugin run creates new ones). */
+  refreshToken?: number;
 }
 
-export function EntityPanel({ caseId, onEntitiesChange }: EntityPanelProps) {
+export function EntityPanel({
+  caseId,
+  onEntitiesChange,
+  plugins = [],
+  onPluginRunSuccess,
+  refreshToken = 0,
+}: EntityPanelProps) {
   const [items, setItems] = useState<EntityRead[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,10 +57,10 @@ export function EntityPanel({ caseId, onEntitiesChange }: EntityPanelProps) {
   }, [caseId, onEntitiesChange]);
 
   useEffect(() => {
-    // One-shot fetch on mount; setState inside async effect is intentional.
+    // Re-fetch on mount and whenever refreshToken changes (e.g. after plugin run).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchEntities();
-  }, [fetchEntities]);
+  }, [fetchEntities, refreshToken]);
 
   function handleCreated(entity: EntityRead) {
     const next = [...items, entity];
@@ -143,6 +155,8 @@ export function EntityPanel({ caseId, onEntitiesChange }: EntityPanelProps) {
         onClose={() => setDetailEntity(null)}
         onUpdated={handleUpdated}
         onDeleted={handleDeleted}
+        plugins={plugins}
+        onPluginRunSuccess={onPluginRunSuccess}
       />
     </>
   );

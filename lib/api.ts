@@ -427,6 +427,129 @@ export async function deleteEntity(caseId: string, entityId: string): Promise<tr
 }
 
 // ──────────────────────────────────────────────
+// Plugin types + helpers
+// ──────────────────────────────────────────────
+
+/** A registered plugin's metadata. */
+export type PluginInfo = {
+  name: string;
+  version: string;
+  entity_types_accepted: string[];
+  entity_types_produced: string[];
+  requires_credentials: boolean;
+};
+
+/** Status values for a plugin run. */
+export type PluginRunStatus = "running" | "succeeded" | "failed";
+
+/** A single plugin run audit record. */
+export type PluginRunRead = {
+  id: string;
+  case_id: string;
+  input_entity_id: string | null;
+  plugin_name: string;
+  plugin_version: string;
+  started_at: string;
+  finished_at: string | null;
+  status: PluginRunStatus;
+  /** Taxonomy-safe label e.g. "upstream_http_error:HTTPStatusError" */
+  error_message: string | null;
+  entities_created_count: number;
+  relationships_created_count: number;
+  evidence_count: number;
+  created_by: string | null;
+};
+
+/** Paginated list response from GET /cases/{id}/plugins/runs. */
+export type PluginRunList = {
+  items: PluginRunRead[];
+  total: number;
+  limit: number;
+  offset: number;
+};
+
+/** Full response body from POST /cases/{id}/plugins/{name}/run (201). */
+export type PluginRunResponse = {
+  run: PluginRunRead;
+  entities: EntityRead[];
+  relationships: RelationshipRead[];
+  evidence: Evidence[];
+};
+
+/**
+ * GET /plugins — list all registered plugins.
+ */
+export async function listPlugins(): Promise<PluginInfo[]> {
+  const res = await apiFetch("/plugins");
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as PluginInfo[];
+}
+
+/**
+ * POST /cases/{caseId}/plugins/{name}/run
+ * Returns 201 PluginRunResponse on success.
+ * Throws descriptive error on 404 / 422 / 500.
+ */
+export async function runPlugin(
+  caseId: string,
+  pluginName: string,
+  inputEntityId: string,
+): Promise<PluginRunResponse> {
+  const res = await apiFetch(`/cases/${caseId}/plugins/${pluginName}/run`, {
+    method: "POST",
+    body: JSON.stringify({ input_entity_id: inputEntityId }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    let detail: string;
+    try {
+      const parsed = JSON.parse(body) as { detail?: string; error_message?: string };
+      detail = parsed.detail ?? parsed.error_message ?? body.slice(0, 200);
+    } catch {
+      detail = body.slice(0, 200);
+    }
+    throw new Error(`API ${res.status}: ${detail}`);
+  }
+  return (await res.json()) as PluginRunResponse;
+}
+
+/**
+ * GET /cases/{caseId}/plugins/runs — paginated run history.
+ */
+export async function listPluginRuns(
+  caseId: string,
+  opts: { limit?: number; offset?: number } = {},
+): Promise<PluginRunList> {
+  const qs = new URLSearchParams();
+  if (opts.limit != null) qs.set("limit", String(opts.limit));
+  if (opts.offset != null) qs.set("offset", String(opts.offset));
+  const query = qs.toString();
+  const res = await apiFetch(`/cases/${caseId}/plugins/runs${query ? `?${query}` : ""}`);
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as PluginRunList;
+}
+
+/**
+ * GET /cases/{caseId}/plugins/runs/{runId} — single run record.
+ * Returns null on 404.
+ */
+export async function getPluginRun(caseId: string, runId: string): Promise<PluginRunRead | null> {
+  const res = await apiFetch(`/cases/${caseId}/plugins/runs/${runId}`);
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  return (await res.json()) as PluginRunRead;
+}
+
+// ──────────────────────────────────────────────
 // Relationship types + CRUD helpers
 // ──────────────────────────────────────────────
 
