@@ -71,6 +71,7 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
 
   function handlePluginRunSuccess(_result: PluginRunResponse) {
     setRefreshToken((t) => t + 1);
+    void _result; // result unused; only presence of success matters
   }
 
   const form = useForm<EditFormValues>({
@@ -102,6 +103,12 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
           status: data.status,
           tags: data.tags,
         });
+        // Fetch plugins in parallel — non-fatal if unavailable
+        listPlugins()
+          .then((p) => setPlugins(p))
+          .catch(() => {
+            // Plugins are optional; silently degrade
+          });
       }
     } catch (err: unknown) {
       notifications.show({

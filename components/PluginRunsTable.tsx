@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Badge, Group, Table, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Badge, Table, Text, Tooltip } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 
 import type { PluginRunRead } from "@/lib/api";

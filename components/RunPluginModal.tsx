@@ -47,7 +47,12 @@ function reducer(state: ModalState, action: ModalAction): ModalState {
     case "TICK":
       return { ...state, elapsed: state.elapsed + 1 };
     case "RUN_SUCCESS":
-      return { phase: "success", elapsed: state.elapsed, result: action.payload, errorMessage: null };
+      return {
+        phase: "success",
+        elapsed: state.elapsed,
+        result: action.payload,
+        errorMessage: null,
+      };
     case "RUN_ERROR":
       return { phase: "error", elapsed: state.elapsed, result: null, errorMessage: action.payload };
     case "RESET":
@@ -74,8 +79,10 @@ function errorHint(msg: string | null): string | null {
   if (!msg) return null;
   if (msg.startsWith("upstream_http_error")) return "The external service returned an HTTP error.";
   if (msg.startsWith("upstream_timeout")) return "The external service did not respond in time.";
-  if (msg.startsWith("type_mismatch")) return "This plugin does not accept the selected entity type.";
-  if (msg.startsWith("plugin execution failed")) return "An unexpected error occurred on the server.";
+  if (msg.startsWith("type_mismatch"))
+    return "This plugin does not accept the selected entity type.";
+  if (msg.startsWith("plugin execution failed"))
+    return "An unexpected error occurred on the server.";
   return null;
 }
 
@@ -198,11 +205,7 @@ export function RunPluginModal({
                 <Button variant="subtle" color="gray" size="sm" onClick={handleClose}>
                   Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  leftSection={<IconPlayerPlay size={14} />}
-                  onClick={handleRun}
-                >
+                <Button size="sm" leftSection={<IconPlayerPlay size={14} />} onClick={handleRun}>
                   Run
                 </Button>
               </Group>
@@ -234,7 +237,7 @@ export function RunPluginModal({
               <Stack align="center" gap="xs" py="xs">
                 <IconCheck size={32} color="var(--mantine-color-green-5)" />
                 <Text fw={500} c="green">
-                  Plugin succeeded in {(state.elapsed).toFixed(0)}s
+                  Plugin succeeded in {state.elapsed.toFixed(0)}s
                 </Text>
               </Stack>
 

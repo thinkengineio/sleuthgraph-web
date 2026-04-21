@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Badge,
-  Box,
-  Code,
-  Divider,
-  Drawer,
-  Group,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Badge, Code, Divider, Drawer, Group, Stack, Text } from "@mantine/core";
 
 import type { PluginRunRead } from "@/lib/api";
 import { formatTs } from "@/lib/format";
