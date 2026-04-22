@@ -1,0 +1,239 @@
+/* Full-bleed landing page. Mantine AppShell on authed pages has a top bar;
+   the landing page is rendered below it so we use min-h-screen, not 100vh. */
+.page {
+  position: relative;
+  min-height: calc(100vh - 60px);
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+/* ============================================================
+   Background layers (stacked absolutely under the content)
+   ============================================================ */
+
+.bgAurora,
+.bgGrid,
+.bgVignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Soft drifting aurora — three large radial blobs that slowly translate. */
+.bgAurora {
+  background:
+    radial-gradient(
+      60% 40% at 20% 30%,
+      color-mix(in srgb, var(--mantine-color-investigatorBlue-6) 35%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      45% 45% at 80% 20%,
+      color-mix(in srgb, var(--mantine-color-grape-6) 30%, transparent) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      55% 50% at 60% 90%,
+      color-mix(in srgb, var(--mantine-color-teal-7) 28%, transparent) 0%,
+      transparent 70%
+    );
+  animation: drift 26s ease-in-out infinite alternate;
+  filter: blur(40px);
+  z-index: 0;
+}
+
+/* Subtle dot grid that pans slowly — adds depth without shouting. */
+.bgGrid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: 0 0;
+  animation: pan 60s linear infinite;
+  mask-image: radial-gradient(ellipse 75% 60% at center, black 35%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 60% at center, black 35%, transparent 90%);
+  z-index: 0;
+}
+
+/* Dark vignette — keeps the edges readable and the center in focus. */
+.bgVignette {
+  background: radial-gradient(ellipse 60% 50% at center, transparent 0%, rgba(0, 0, 0, 0.35) 100%);
+  z-index: 1;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-3%, 2%, 0) scale(1.05);
+  }
+  100% {
+    transform: translate3d(2%, -2%, 0) scale(1);
+  }
+}
+
+@keyframes pan {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 320px 320px;
+  }
+}
+
+/* ============================================================
+   Content — glass card + hero typography
+   ============================================================ */
+
+.content {
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+/* Staggered fade-in-up. Each child uses --delay custom prop. */
+.fadeIn {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  animation: fadeInUp 700ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Wordmark: large, tight, gradient-filled, subtle neon glow. */
+.wordmark {
+  font-size: clamp(56px, 9vw, 112px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  margin: 0;
+  background: linear-gradient(
+    120deg,
+    var(--mantine-color-gray-0) 0%,
+    var(--mantine-color-investigatorBlue-3) 50%,
+    var(--mantine-color-grape-3) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 32px color-mix(in srgb, var(--mantine-color-investigatorBlue-5) 20%, transparent);
+  text-align: center;
+}
+
+.tagline {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--mantine-color-gray-4);
+  text-align: center;
+  margin: 0;
+  max-width: 440px;
+}
+
+.taglineAccent {
+  color: var(--mantine-color-investigatorBlue-3);
+  font-weight: 500;
+}
+
+/* Pre-alpha chip — small, discreet, not a feature. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mantine-color-investigatorBlue-2);
+  background: color-mix(in srgb, var(--mantine-color-investigatorBlue-9) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mantine-color-investigatorBlue-5) 30%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.chipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mantine-color-investigatorBlue-4);
+  box-shadow: 0 0 6px var(--mantine-color-investigatorBlue-4);
+  animation: chipPulse 2s ease-in-out infinite;
+}
+
+@keyframes chipPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Primary CTA row */
+.ctaRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.userHint {
+  font-size: 13px;
+  color: var(--mantine-color-gray-4);
+}
+
+.userEmail {
+  color: var(--mantine-color-investigatorBlue-3);
+  font-weight: 500;
+}
+
+.footer {
+  font-size: 12px;
+  color: var(--mantine-color-gray-5);
+  margin-top: 16px;
+}
+
+.footer a {
+  color: var(--mantine-color-investigatorBlue-3);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.footer a:hover {
+  color: var(--mantine-color-investigatorBlue-2);
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .bgAurora,
+  .bgGrid,
+  .chipDot {
+    animation: none;
+  }
+  .fadeIn {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
