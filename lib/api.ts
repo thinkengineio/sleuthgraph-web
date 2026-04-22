@@ -105,6 +105,7 @@ export async function apiResetPassword(token: string, password: string): Promise
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${getApiBaseUrl()}${path}`, {
+    credentials: "include",
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -714,4 +715,38 @@ export async function deleteRelationship(caseId: string, relId: string): Promise
     throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
   }
   return true;
+}
+
+// ──────────────────────────────────────────────
+// Graph types + helpers
+// ──────────────────────────────────────────────
+
+export type GraphVertex = {
+  id: string;
+  type: EntityType;
+  label: string;
+  confidence: number;
+  attrs: Record<string, unknown>;
+};
+
+export type GraphEdge = {
+  id: string;
+  source: string;
+  target: string;
+  rel_type: RelationshipType;
+  confidence: number;
+  source_plugin: string | null;
+  attrs: Record<string, unknown>;
+};
+
+export type GraphDump = {
+  vertices: GraphVertex[];
+  edges: GraphEdge[];
+};
+
+/**
+ * GET /cases/{caseId}/graph — fetch flat graph dump for a case.
+ */
+export async function getGraph(caseId: string): Promise<GraphDump> {
+  return request<GraphDump>(`/cases/${caseId}/graph`);
 }
