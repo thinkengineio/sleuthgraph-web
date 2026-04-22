@@ -33,6 +33,12 @@ export function layoutOptions(name: LayoutName): LayoutOptions {
     case "breadthfirst":
       return { name: "breadthfirst", animate: false, fit: true, padding: 30, directed: true };
     case "dagre":
-      return { name: "dagre", animate: false, fit: true, padding: 30, rankDir: "TB" } as LayoutOptions;
+      return {
+        name: "dagre",
+        animate: false,
+        fit: true,
+        padding: 30,
+        rankDir: "TB",
+      } as LayoutOptions;
   }
 }

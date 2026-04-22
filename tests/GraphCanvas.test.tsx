@@ -40,7 +40,9 @@ function makeFakeCy(): FakeCore {
     }
   });
   const nodesArr: Array<{ data: (k: string) => unknown; style: ReturnType<typeof vi.fn> }> = [];
-  const nodes = vi.fn(() => ({ forEach: (cb: (n: (typeof nodesArr)[number]) => void) => nodesArr.forEach(cb) }));
+  const nodes = vi.fn(() => ({
+    forEach: (cb: (n: (typeof nodesArr)[number]) => void) => nodesArr.forEach(cb),
+  }));
   const batch = vi.fn((fn: () => void) => fn());
   const fit = vi.fn();
   const png = vi.fn(() => "data:image/png;base64,FAKE");

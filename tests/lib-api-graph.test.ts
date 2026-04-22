@@ -4,12 +4,20 @@ import { getGraph } from "@/lib/api";
 
 describe("getGraph", () => {
   beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({
-        vertices: [{ id: "v1", type: "DOMAIN", label: "example.com", confidence: 1.0, attrs: {} }],
-        edges: [],
-      }), { status: 200, headers: { "content-type": "application/json" } }),
-    ));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            vertices: [
+              { id: "v1", type: "DOMAIN", label: "example.com", confidence: 1.0, attrs: {} },
+            ],
+            edges: [],
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
+      ),
+    );
   });
 
   it("fetches /cases/:id/graph and returns typed result", async () => {

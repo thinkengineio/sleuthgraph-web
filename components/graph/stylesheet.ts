@@ -6,13 +6,13 @@ import type { EntityType, RelationshipType } from "@/lib/entityTypes";
 // We can't pull CSS custom properties at stylesheet-build time (cytoscape needs
 // literal values), so we embed the hexes directly.
 const ENTITY_COLOR_HEX: Record<EntityType, string> = {
-  PERSON: "#4c6ef5",         // blue
-  ORGANIZATION: "#be4bdb",   // grape
-  DOMAIN: "#12b886",         // teal
-  IP_ADDRESS: "#15aabf",     // cyan
-  EMAIL: "#fab005",          // yellow
-  PHONE: "#e64980",          // pink
-  URL: "#4c4cb5",            // indigo
+  PERSON: "#4c6ef5", // blue
+  ORGANIZATION: "#be4bdb", // grape
+  DOMAIN: "#12b886", // teal
+  IP_ADDRESS: "#15aabf", // cyan
+  EMAIL: "#fab005", // yellow
+  PHONE: "#e64980", // pink
+  URL: "#4c4cb5", // indigo
   CRYPTO_ADDRESS: "#fd7e14", // orange
 };
 
@@ -38,13 +38,15 @@ export function buildStylesheet(): Stylesheet[] {
     } as cytoscape.Css.Node,
   }));
 
-  const relSelectors = (Object.keys(REL_COLOR_HEX) as (RelationshipType | "DEFAULT")[]).map((t) => ({
-    selector: t === "DEFAULT" ? "edge" : `edge[rel_type = "${t}"]`,
-    style: {
-      "line-color": REL_COLOR_HEX[t],
-      "target-arrow-color": REL_COLOR_HEX[t],
-    } as cytoscape.Css.Edge,
-  }));
+  const relSelectors = (Object.keys(REL_COLOR_HEX) as (RelationshipType | "DEFAULT")[]).map(
+    (t) => ({
+      selector: t === "DEFAULT" ? "edge" : `edge[rel_type = "${t}"]`,
+      style: {
+        "line-color": REL_COLOR_HEX[t],
+        "target-arrow-color": REL_COLOR_HEX[t],
+      } as cytoscape.Css.Edge,
+    }),
+  );
 
   return [
     {

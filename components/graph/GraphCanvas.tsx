@@ -110,8 +110,7 @@ export function GraphCanvas({
     if (!cy || !cyCallbackRef) return;
     cyCallbackRef.current = {
       fit: () => cy.fit(undefined, 30),
-      png: () =>
-        cy.png({ output: "base64uri", bg: "#1a1b1e", full: true }) as string | undefined,
+      png: () => cy.png({ output: "base64uri", bg: "#1a1b1e", full: true }) as string | undefined,
     };
     return () => {
       cyCallbackRef.current = null;

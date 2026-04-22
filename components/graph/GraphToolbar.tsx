@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  ActionIcon,
-  Chip,
-  Group,
-  Select,
-  Text,
-  TextInput,
-  Tooltip,
-} from "@mantine/core";
+import { ActionIcon, Chip, Group, Select, Text, TextInput, Tooltip } from "@mantine/core";
 import { IconArrowsMaximize, IconPhoto, IconSearch } from "@tabler/icons-react";
 
 import { ENTITY_TYPES, ENTITY_TYPE_META, type EntityType } from "@/lib/entityTypes";

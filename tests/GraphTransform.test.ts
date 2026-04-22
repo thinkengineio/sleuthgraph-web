@@ -20,22 +20,41 @@ describe("graphToElements", () => {
         { id: "a", type: "DOMAIN", label: "a", confidence: 1, attrs: {} },
         { id: "b", type: "DOMAIN", label: "b", confidence: 1, attrs: {} },
       ],
-      edges: [{
-        id: "e1", source: "a", target: "b", rel_type: "ASSOCIATED_WITH",
-        confidence: 0.9, source_plugin: "crtsh", attrs: {},
-      }],
+      edges: [
+        {
+          id: "e1",
+          source: "a",
+          target: "b",
+          rel_type: "ASSOCIATED_WITH",
+          confidence: 0.9,
+          source_plugin: "crtsh",
+          attrs: {},
+        },
+      ],
     });
-    const edge = elements.find(el => el.data?.source !== undefined);
-    expect(edge?.data).toMatchObject({ id: "e1", source: "a", target: "b", rel_type: "ASSOCIATED_WITH" });
+    const edge = elements.find((el) => el.data?.source !== undefined);
+    expect(edge?.data).toMatchObject({
+      id: "e1",
+      source: "a",
+      target: "b",
+      rel_type: "ASSOCIATED_WITH",
+    });
   });
 
   it("drops edges whose endpoints are not in the vertex set", () => {
     const elements = graphToElements({
       vertices: [{ id: "a", type: "DOMAIN", label: "a", confidence: 1, attrs: {} }],
-      edges: [{
-        id: "e1", source: "a", target: "missing", rel_type: "ASSOCIATED_WITH",
-        confidence: 1, source_plugin: null, attrs: {},
-      }],
+      edges: [
+        {
+          id: "e1",
+          source: "a",
+          target: "missing",
+          rel_type: "ASSOCIATED_WITH",
+          confidence: 1,
+          source_plugin: null,
+          attrs: {},
+        },
+      ],
     });
     // Only the one node should remain; the edge is dropped.
     expect(elements).toHaveLength(1);

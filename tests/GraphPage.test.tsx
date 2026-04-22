@@ -27,26 +27,49 @@ vi.mock("@/lib/api", async (importOriginal) => {
       ],
       edges: [
         {
-          id: "e1", source: "v1", target: "v2", rel_type: "RESOLVES_TO",
-          confidence: 0.8, source_plugin: "dns", attrs: {},
+          id: "e1",
+          source: "v1",
+          target: "v2",
+          rel_type: "RESOLVES_TO",
+          confidence: 0.8,
+          source_plugin: "dns",
+          attrs: {},
         },
       ],
     }),
     listEntities: vi.fn().mockResolvedValue([
       {
-        id: "v1", case_id: "c1", type: "DOMAIN", label: "example.com",
-        confidence: 1.0, attrs: {}, created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-01T00:00:00Z",
+        id: "v1",
+        case_id: "c1",
+        type: "DOMAIN",
+        label: "example.com",
+        confidence: 1.0,
+        attrs: {},
+        created_at: "2024-01-01T00:00:00Z",
+        updated_at: "2024-01-01T00:00:00Z",
       },
       {
-        id: "v2", case_id: "c1", type: "IP_ADDRESS", label: "1.2.3.4",
-        confidence: 0.9, attrs: {}, created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-01T00:00:00Z",
+        id: "v2",
+        case_id: "c1",
+        type: "IP_ADDRESS",
+        label: "1.2.3.4",
+        confidence: 0.9,
+        attrs: {},
+        created_at: "2024-01-01T00:00:00Z",
+        updated_at: "2024-01-01T00:00:00Z",
       },
     ]),
     listRelationships: vi.fn().mockResolvedValue([
       {
-        id: "e1", case_id: "c1", src_entity_id: "v1", dst_entity_id: "v2",
-        rel_type: "RESOLVES_TO", confidence: 0.8, source_plugin: "dns",
-        attrs: {}, created_at: "2024-01-01T00:00:00Z",
+        id: "e1",
+        case_id: "c1",
+        src_entity_id: "v1",
+        dst_entity_id: "v2",
+        rel_type: "RESOLVES_TO",
+        confidence: 0.8,
+        source_plugin: "dns",
+        attrs: {},
+        created_at: "2024-01-01T00:00:00Z",
       },
     ]),
   };
@@ -59,9 +82,7 @@ function Wrapper({ children }: { children: React.ReactNode }) {
   return (
     <MantineProvider>
       <Notifications />
-      <Suspense fallback={<div>Suspense loading...</div>}>
-        {children}
-      </Suspense>
+      <Suspense fallback={<div>Suspense loading...</div>}>{children}</Suspense>
     </MantineProvider>
   );
 }
