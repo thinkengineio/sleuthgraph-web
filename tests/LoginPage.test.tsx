@@ -124,7 +124,7 @@ describe("LoginPage", () => {
     });
   });
 
-  it("shows SSO button as disabled when OIDC is enabled", async () => {
+  it("shows SSO button and redirects on click when OIDC is enabled", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockImplementation(() =>
@@ -137,12 +137,21 @@ describe("LoginPage", () => {
       ),
     );
 
-    renderWithMantine(<LoginPage />);
-
-    await waitFor(() => {
-      const ssoBtn = screen.getByRole("button", { name: /sign in with sso/i });
-      expect(ssoBtn).toBeDisabled();
+    // jsdom window.location is non-assignable by default; stub it.
+    const original = window.location;
+    const assignMock = vi.fn();
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...original, href: "", assign: assignMock },
     });
+
+    renderWithMantine(<LoginPage />);
+    const ssoBtn = await screen.findByRole("button", { name: /sign in with sso/i });
+    expect(ssoBtn).not.toBeDisabled();
+    fireEvent.click(ssoBtn);
+    expect(window.location.href).toContain("/auth/oidc/login");
+
+    Object.defineProperty(window, "location", { configurable: true, value: original });
   });
 
   it("renders 'Forgot password?' link when password_reset_enabled=true", async () => {
