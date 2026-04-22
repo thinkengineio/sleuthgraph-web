@@ -15,12 +15,11 @@ import {
   Text,
   TextInput,
   Title,
-  Tooltip,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 
-import { apiFetch, AuthConfig, getAuthConfig, OidcStatus } from "@/lib/api";
+import { apiFetch, AuthConfig, getAuthConfig, oidcLoginUrl, OidcStatus } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 
 interface LoginFormValues {
@@ -115,17 +114,16 @@ export default function LoginPage() {
           {oidcStatus?.enabled === true && (
             <>
               <Divider label="or" labelPosition="center" />
-              <Tooltip label="SSO sign-in is coming in Phase 2.5" withArrow position="bottom">
-                <Button
-                  variant="default"
-                  fullWidth
-                  disabled
-                  aria-disabled="true"
-                  aria-label="Sign in with SSO (not yet available)"
-                >
-                  Sign in with SSO
-                </Button>
-              </Tooltip>
+              <Button
+                variant="default"
+                fullWidth
+                onClick={() => {
+                  window.location.href = oidcLoginUrl("/");
+                }}
+                aria-label="Sign in with SSO"
+              >
+                Sign in with SSO
+              </Button>
             </>
           )}
 
