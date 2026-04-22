@@ -42,10 +42,26 @@ export default function GraphPage({ params }: PageProps) {
 
   useEffect(() => {
     let cancelled = false;
+
+    // List endpoints cap limit at 200, so page through them. The graph dump
+    // itself is already up to 10k — it's the source of truth for the canvas;
+    // the per-row lists only exist to hydrate drawer detail on click.
+    const PAGE = 200;
+    async function loadAll<T>(fetcher: (offset: number) => Promise<T[]>): Promise<T[]> {
+      const out: T[] = [];
+      let offset = 0;
+      while (true) {
+        const batch = await fetcher(offset);
+        out.push(...batch);
+        if (batch.length < PAGE) return out;
+        offset += PAGE;
+      }
+    }
+
     Promise.all([
       getGraph(caseId),
-      listEntities(caseId, { limit: 500 }),
-      listRelationships(caseId, { limit: 500 }),
+      loadAll<EntityRead>((offset) => listEntities(caseId, { limit: PAGE, offset })),
+      loadAll<RelationshipRead>((offset) => listRelationships(caseId, { limit: PAGE, offset })),
     ])
       .then(([g, ents, rels]) => {
         if (cancelled) return;
