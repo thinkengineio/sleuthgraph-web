@@ -25,6 +25,7 @@ import {
   IconAlertCircle,
   IconArchive,
   IconArrowLeft,
+  IconChartDots2,
   IconDeviceFloppy,
   IconTrash,
 } from "@tabler/icons-react";
@@ -269,11 +270,22 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
       </Button>
 
       {/* Case title + status badge */}
-      <Group align="center" gap="sm">
-        <Title order={3}>{caseData.name}</Title>
-        <Badge color={caseData.status === "active" ? "green" : "gray"} variant="light" size="sm">
-          {caseData.status}
-        </Badge>
+      <Group justify="space-between" align="center">
+        <Group align="center" gap="sm">
+          <Title order={3}>{caseData.name}</Title>
+          <Badge color={caseData.status === "active" ? "green" : "gray"} variant="light" size="sm">
+            {caseData.status}
+          </Badge>
+        </Group>
+        <Button
+          component={Link}
+          href={`/cases/${caseId}/graph`}
+          variant="default"
+          size="xs"
+          leftSection={<IconChartDots2 size={14} />}
+        >
+          View graph
+        </Button>
       </Group>
 
       {/* Edit form */}
