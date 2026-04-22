@@ -30,3 +30,9 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => false,
   }),
 });
+
+// Cytoscape's renderer inspects HTMLCanvasElement.getContext during init.
+// jsdom doesn't implement it — stub with a minimal noop so cytoscape.mount() doesn't throw.
+if (typeof HTMLCanvasElement !== "undefined") {
+  HTMLCanvasElement.prototype.getContext = () => null;
+}
