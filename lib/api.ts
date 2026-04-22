@@ -708,3 +708,37 @@ export async function deleteRelationship(caseId: string, relId: string): Promise
   }
   return true;
 }
+
+// ──────────────────────────────────────────────
+// Graph types + helpers
+// ──────────────────────────────────────────────
+
+export type GraphVertex = {
+  id: string;
+  type: EntityType;
+  label: string;
+  confidence: number;
+  attrs: Record<string, unknown>;
+};
+
+export type GraphEdge = {
+  id: string;
+  source: string;
+  target: string;
+  rel_type: RelationshipType;
+  confidence: number;
+  source_plugin: string | null;
+  attrs: Record<string, unknown>;
+};
+
+export type GraphDump = {
+  vertices: GraphVertex[];
+  edges: GraphEdge[];
+};
+
+/**
+ * GET /cases/{caseId}/graph — fetch flat graph dump for a case.
+ */
+export async function getGraph(caseId: string): Promise<GraphDump> {
+  return request<GraphDump>(`/cases/${caseId}/graph`);
+}
