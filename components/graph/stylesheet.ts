@@ -1,4 +1,4 @@
-import type { Stylesheet } from "cytoscape";
+import type { Css, StylesheetStyle } from "cytoscape";
 
 import type { EntityType, RelationshipType } from "@/lib/entityTypes";
 
@@ -28,14 +28,18 @@ const REL_COLOR_HEX: Record<RelationshipType | "DEFAULT", string> = {
   DEFAULT: "#495057",
 };
 
-export function buildStylesheet(): Stylesheet[] {
+// Stylesheet entries use cytoscape's loose CSS-map shape. The packaged types
+// are stricter than what the runtime accepts (e.g. target-arrow-scale is
+// missing from Css.Edge), so we model each block as StylesheetStyle and cast
+// the inner style maps as needed.
+export function buildStylesheet(): StylesheetStyle[] {
   const entitySelectors = (Object.keys(ENTITY_COLOR_HEX) as EntityType[]).map((t) => ({
     selector: `node[type = "${t}"]`,
     style: {
       "background-color": ENTITY_COLOR_HEX[t],
       "border-color": "#ffffff",
       "border-width": 2,
-    } as cytoscape.Css.Node,
+    } as Css.Node,
   }));
 
   const relSelectors = (Object.keys(REL_COLOR_HEX) as (RelationshipType | "DEFAULT")[]).map(
@@ -44,7 +48,7 @@ export function buildStylesheet(): Stylesheet[] {
       style: {
         "line-color": REL_COLOR_HEX[t],
         "target-arrow-color": REL_COLOR_HEX[t],
-      } as cytoscape.Css.Edge,
+      } as Css.Edge,
     }),
   );
 
@@ -74,7 +78,7 @@ export function buildStylesheet(): Stylesheet[] {
         "target-arrow-shape": "triangle",
         "target-arrow-scale": 1.2,
         opacity: 0.7,
-      },
+      } as Css.Edge,
     },
     ...relSelectors,
     {

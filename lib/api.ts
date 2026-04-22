@@ -98,6 +98,7 @@ export async function apiResetPassword(token: string, password: string): Promise
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${getApiBaseUrl()}${path}`, {
+    credentials: "include",
     ...init,
     headers: {
       "Content-Type": "application/json",
