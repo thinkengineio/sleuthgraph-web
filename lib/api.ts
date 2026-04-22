@@ -44,6 +44,13 @@ export async function getAuthConfig(): Promise<AuthConfig> {
   return request<AuthConfig>("/auth/config");
 }
 
+/** Absolute URL for starting the OIDC login redirect chain. */
+export function oidcLoginUrl(nextPath: string = "/"): string {
+  const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api").replace(/\/$/, "");
+  const q = new URLSearchParams({ next: nextPath });
+  return `${base}/auth/oidc/login?${q.toString()}`;
+}
+
 export async function apiRegister(email: string, password: string, name?: string): Promise<UserMe> {
   const res = await fetch(`${getApiBaseUrl()}/auth/register`, {
     method: "POST",
