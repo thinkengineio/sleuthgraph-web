@@ -63,21 +63,31 @@ export function buildStylesheet(): StylesheetStyle[] {
         "text-outline-color": "#1a1b1e",
         "text-outline-width": 1,
         "text-valign": "bottom",
-        "text-margin-y": 4,
-        width: 36,
-        height: 36,
+        "text-margin-y": 6,
+        width: 34,
+        height: 34,
+        "border-color": "rgba(255,255,255,0.12)",
+        "border-width": 1.5,
         "overlay-opacity": 0,
-      },
+        // Tween color / size / border smoothly on class or selection changes.
+        "transition-property":
+          "background-color, border-color, border-width, width, height, opacity",
+        "transition-duration": 220,
+        "transition-timing-function": "ease-out",
+      } as Css.Node,
     },
     ...entitySelectors,
     {
       selector: "edge",
       style: {
-        width: 2,
+        width: 1.6,
         "curve-style": "bezier",
         "target-arrow-shape": "triangle",
-        "target-arrow-scale": 1.2,
-        opacity: 0.7,
+        "target-arrow-scale": 1.1,
+        opacity: 0.55,
+        "transition-property": "width, opacity, line-color",
+        "transition-duration": 220,
+        "transition-timing-function": "ease-out",
       } as Css.Edge,
     },
     ...relSelectors,
@@ -85,19 +95,49 @@ export function buildStylesheet(): StylesheetStyle[] {
       selector: 'edge[rel_type = "ASSOCIATED_WITH"]',
       style: { "line-style": "dashed" },
     },
+    // Hovered node — grow slightly, thicker accent border, full label.
+    {
+      selector: "node.hovered",
+      style: {
+        width: 44,
+        height: 44,
+        "border-color": "#ffffff",
+        "border-width": 2.5,
+        "z-index": 99,
+      } as Css.Node,
+    },
+    // Hovered edge — brighten + thicken.
+    {
+      selector: "edge.hovered",
+      style: {
+        width: 3,
+        opacity: 1,
+      } as Css.Edge,
+    },
+    // Dim everything that isn't connected to the hovered node for focus.
+    {
+      selector: ".faded",
+      style: {
+        opacity: 0.15,
+      },
+    },
     {
       selector: "node:selected",
       style: {
         "border-color": "#fab005",
-        "border-width": 4,
-      },
+        "border-width": 3.5,
+        width: 42,
+        height: 42,
+      } as Css.Node,
     },
     {
       selector: "edge:selected",
       style: {
-        width: 4,
+        width: 3.5,
         opacity: 1.0,
-      },
+        "line-color": "#fab005",
+        "target-arrow-color": "#fab005",
+      } as Css.Edge,
     },
   ];
 }

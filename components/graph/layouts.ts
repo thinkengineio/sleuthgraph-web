@@ -11,34 +11,41 @@ export const LAYOUT_LABELS: Record<LayoutName, string> = {
 };
 
 export function layoutOptions(name: LayoutName): LayoutOptions {
+  // Layouts animate node-to-node transitions so switching feels fluid.
+  // "end" timing means nodes tween to their final position smoothly.
+  const common = {
+    fit: true,
+    padding: 40,
+    animate: "end" as const,
+    animationDuration: 650,
+    animationEasing: "ease-out-cubic" as const,
+  };
   switch (name) {
     case "cose-bilkent":
       return {
+        ...common,
         name: "cose-bilkent",
-        animate: false,
-        fit: true,
-        padding: 30,
         nodeRepulsion: 4500,
-        idealEdgeLength: 100,
+        idealEdgeLength: 110,
+        nodeDimensionsIncludeLabels: true,
       } as LayoutOptions;
     case "concentric":
       return {
+        ...common,
         name: "concentric",
-        animate: false,
-        fit: true,
-        padding: 30,
         concentric: (node) => node.degree(false),
         levelWidth: () => 1,
+        minNodeSpacing: 24,
       };
     case "breadthfirst":
-      return { name: "breadthfirst", animate: false, fit: true, padding: 30, directed: true };
+      return { ...common, name: "breadthfirst", directed: true, spacingFactor: 1.1 };
     case "dagre":
       return {
+        ...common,
         name: "dagre",
-        animate: false,
-        fit: true,
-        padding: 30,
         rankDir: "TB",
+        rankSep: 60,
+        nodeSep: 40,
       } as LayoutOptions;
   }
 }

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { Button, Container, Group, Stack, Text, Title } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconSearch, IconLogout } from "@tabler/icons-react";
+import { IconArrowRight, IconLogout } from "@tabler/icons-react";
 
-import HealthBadge from "@/components/HealthBadge";
 import { useAuth } from "@/lib/AuthContext";
+
+import classes from "./landing.module.css";
 
 export default function Home() {
   const { user, loading, logout } = useAuth();
@@ -25,74 +26,97 @@ export default function Home() {
   }
 
   return (
-    <Container size="sm" py="xl">
-      <Stack align="center" gap="lg">
-        <Title order={1} ta="center">
-          Sleuthgraph
-        </Title>
-        <Text size="md" c="dimmed" ta="center">
-          OSINT investigation workbench &middot; pre-alpha
-        </Text>
+    <div className={classes.page}>
+      <div className={classes.bgAurora} aria-hidden="true" />
+      <div className={classes.bgGrid} aria-hidden="true" />
+      <div className={classes.bgVignette} aria-hidden="true" />
 
-        <HealthBadge />
+      <div className={classes.content}>
+        <span
+          className={`${classes.chip} ${classes.fadeIn}`}
+          style={{ "--delay": "0ms" } as React.CSSProperties}
+        >
+          <span className={classes.chipDot} />
+          Pre-alpha
+        </span>
+
+        <h1
+          className={`${classes.wordmark} ${classes.fadeIn}`}
+          style={{ "--delay": "80ms" } as React.CSSProperties}
+        >
+          Sleuthgraph
+        </h1>
+
+        <p
+          className={`${classes.tagline} ${classes.fadeIn}`}
+          style={{ "--delay": "160ms" } as React.CSSProperties}
+        >
+          Open-source <span className={classes.taglineAccent}>OSINT investigation workbench</span>.
+          Pivot across domains, people, and organizations — backed by a typed graph, evidence chain
+          of custody, and a plugin SDK.
+        </p>
 
         {!loading && !user && (
-          <Stack align="center" gap="sm">
-            <Text size="sm" c="dimmed">
-              Sign in to start investigating.
-            </Text>
+          <div
+            className={`${classes.ctaRow} ${classes.fadeIn}`}
+            style={{ "--delay": "260ms" } as React.CSSProperties}
+          >
             <Button
               component={Link}
               href="/login"
-              leftSection={<IconSearch size={16} />}
-              variant="filled"
+              size="md"
+              radius="md"
+              rightSection={<IconArrowRight size={16} />}
             >
-              Sign in
+              Sign in to start
             </Button>
-          </Stack>
+          </div>
         )}
 
         {!loading && user && (
-          <Stack align="center" gap="sm">
-            <Text size="sm" fw={500}>
-              Welcome, {user.email}
-            </Text>
-            <Group gap="sm">
+          <>
+            <p
+              className={`${classes.userHint} ${classes.fadeIn}`}
+              style={{ "--delay": "220ms" } as React.CSSProperties}
+            >
+              Welcome back, <span className={classes.userEmail}>{user.email}</span>
+            </p>
+            <div
+              className={`${classes.ctaRow} ${classes.fadeIn}`}
+              style={{ "--delay": "300ms" } as React.CSSProperties}
+            >
               <Button
                 component={Link}
                 href="/cases"
-                variant="light"
-                leftSection={<IconSearch size={16} />}
+                size="md"
+                radius="md"
+                rightSection={<IconArrowRight size={16} />}
               >
-                Go to Cases
+                Go to cases
               </Button>
               <Button
                 variant="subtle"
                 color="gray"
+                size="md"
+                radius="md"
                 leftSection={<IconLogout size={16} />}
                 onClick={handleLogout}
               >
                 Sign out
               </Button>
-            </Group>
-          </Stack>
+            </div>
+          </>
         )}
 
-        <Text size="xs" c="dimmed">
-          See{" "}
-          <Text
-            component="a"
-            href="https://github.com/francose/sleuthgraph"
-            target="_blank"
-            rel="noopener"
-            size="xs"
-            c="investigatorBlue.4"
-          >
+        <p
+          className={`${classes.footer} ${classes.fadeIn}`}
+          style={{ "--delay": "380ms" } as React.CSSProperties}
+        >
+          <a href="https://github.com/francose/sleuthgraph" target="_blank" rel="noopener">
             github.com/francose/sleuthgraph
-          </Text>{" "}
-          for docs.
-        </Text>
-      </Stack>
-    </Container>
+          </a>
+        </p>
+      </div>
+    </div>
   );
 }

@@ -70,16 +70,53 @@ export function GraphCanvas({
   const elements = useMemo(() => graphToElements(dump), [dump]);
   const stylesheet = useMemo(() => buildStylesheet(), []);
 
-  // Bind click handlers — re-bind when cy or callbacks change.
+  // Bind click + hover handlers — re-bind when cy or callbacks change.
   useEffect(() => {
     if (!cy) return;
     const handleNode = (e: cytoscape.EventObject) => onNodeClick(e.target.id() as string);
     const handleEdge = (e: cytoscape.EventObject) => onEdgeClick(e.target.id() as string);
+
+    // Hover: grow the node + its connected edges, fade everything else for focus.
+    const handleNodeMouseover = (e: cytoscape.EventObject) => {
+      const node = e.target;
+      const neighborhood = node.closedNeighborhood();
+      cy.batch(() => {
+        cy.elements().not(neighborhood).addClass("faded");
+        node.addClass("hovered");
+        node.connectedEdges().addClass("hovered");
+      });
+      cy.container()?.style.setProperty("cursor", "pointer");
+    };
+    const handleNodeMouseout = (e: cytoscape.EventObject) => {
+      cy.batch(() => {
+        cy.elements().removeClass("faded");
+        e.target.removeClass("hovered");
+        e.target.connectedEdges().removeClass("hovered");
+      });
+      cy.container()?.style.removeProperty("cursor");
+    };
+    const handleEdgeMouseover = (e: cytoscape.EventObject) => {
+      e.target.addClass("hovered");
+      cy.container()?.style.setProperty("cursor", "pointer");
+    };
+    const handleEdgeMouseout = (e: cytoscape.EventObject) => {
+      e.target.removeClass("hovered");
+      cy.container()?.style.removeProperty("cursor");
+    };
+
     cy.on("tap", "node", handleNode);
     cy.on("tap", "edge", handleEdge);
+    cy.on("mouseover", "node", handleNodeMouseover);
+    cy.on("mouseout", "node", handleNodeMouseout);
+    cy.on("mouseover", "edge", handleEdgeMouseover);
+    cy.on("mouseout", "edge", handleEdgeMouseout);
     return () => {
       cy.off("tap", "node", handleNode);
       cy.off("tap", "edge", handleEdge);
+      cy.off("mouseover", "node", handleNodeMouseover);
+      cy.off("mouseout", "node", handleNodeMouseout);
+      cy.off("mouseover", "edge", handleEdgeMouseover);
+      cy.off("mouseout", "edge", handleEdgeMouseout);
     };
   }, [cy, onNodeClick, onEdgeClick]);
 
