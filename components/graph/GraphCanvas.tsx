@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import cytoscape, { type Core, type LayoutOptions } from "cytoscape";
 import CytoscapeComponent from "react-cytoscapejs";
@@ -61,14 +61,17 @@ export function GraphCanvas({
   cyCallbackRef,
 }: GraphCanvasProps) {
   registerExtensions();
-  const cyRef = useRef<Core | null>(null);
+  // Hold the Cytoscape core in state (not ref) so the effects below re-run
+  // once the core becomes available. A plain ref would stay null on the
+  // first-render effect pass and never re-fire when the cy prop callback
+  // fires, leaving tap handlers unbound.
+  const [cy, setCy] = useState<Core | null>(null);
 
   const elements = useMemo(() => graphToElements(dump), [dump]);
   const stylesheet = useMemo(() => buildStylesheet(), []);
 
-  // Bind click handlers — re-bind when callbacks change
+  // Bind click handlers — re-bind when cy or callbacks change.
   useEffect(() => {
-    const cy = cyRef.current;
     if (!cy) return;
     const handleNode = (e: cytoscape.EventObject) => onNodeClick(e.target.id() as string);
     const handleEdge = (e: cytoscape.EventObject) => onEdgeClick(e.target.id() as string);
@@ -78,19 +81,17 @@ export function GraphCanvas({
       cy.off("tap", "node", handleNode);
       cy.off("tap", "edge", handleEdge);
     };
-  }, [onNodeClick, onEdgeClick]);
+  }, [cy, onNodeClick, onEdgeClick]);
 
-  // Re-layout on layoutName or element count change
+  // Re-layout on layoutName or element count change.
   useEffect(() => {
-    const cy = cyRef.current;
     if (!cy) return;
     const opts: LayoutOptions = layoutOptions(layoutName);
     cy.layout(opts).run();
-  }, [layoutName, elements.length]);
+  }, [cy, layoutName, elements.length]);
 
-  // Apply type/search filter by toggling visibility on the cy instance
+  // Apply type/search filter by toggling visibility on the cy instance.
   useEffect(() => {
-    const cy = cyRef.current;
     if (!cy) return;
     cy.batch(() => {
       cy.nodes().forEach((n) => {
@@ -101,23 +102,29 @@ export function GraphCanvas({
         n.style("display", typeOk && searchOk ? "element" : "none");
       });
     });
-  }, [visibleTypes, searchQuery]);
+  }, [cy, visibleTypes, searchQuery]);
+
+  // Wire up the imperative handle for the parent page. Null it on unmount
+  // (or when cy changes) so a stale handle can't call into a destroyed core.
+  useEffect(() => {
+    if (!cy || !cyCallbackRef) return;
+    cyCallbackRef.current = {
+      fit: () => cy.fit(undefined, 30),
+      png: () =>
+        cy.png({ output: "base64uri", bg: "#1a1b1e", full: true }) as string | undefined,
+    };
+    return () => {
+      cyCallbackRef.current = null;
+    };
+  }, [cy, cyCallbackRef]);
 
   return (
     <CytoscapeComponent
       elements={elements}
       stylesheet={stylesheet}
       style={{ width: "100%", height: "100%" }}
-      cy={(cy) => {
-        cyRef.current = cy;
-        // Wire up the imperative handle so the parent page can call fit/png.
-        if (cyCallbackRef) {
-          cyCallbackRef.current = {
-            fit: () => cy.fit(),
-            png: () =>
-              cy.png({ output: "base64uri", bg: "#1a1b1e", full: true }) as string | undefined,
-          };
-        }
+      cy={(instance) => {
+        setCy(instance);
       }}
       layout={layoutOptions(layoutName)}
       wheelSensitivity={0.2}
