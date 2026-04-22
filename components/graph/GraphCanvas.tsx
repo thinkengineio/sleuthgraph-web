@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { useEffect, useMemo, useRef } from "react";
 
 import cytoscape, { type Core, type LayoutOptions } from "cytoscape";
@@ -33,6 +34,12 @@ function registerExtensions() {
   }
 }
 
+/** Public imperative handle exposed to the parent page (fit + export). */
+export type GraphCanvasHandle = {
+  fit: () => void;
+  png: () => string | undefined;
+};
+
 interface GraphCanvasProps {
   dump: GraphDump;
   layoutName: LayoutName;
@@ -40,6 +47,8 @@ interface GraphCanvasProps {
   onEdgeClick: (id: string) => void;
   visibleTypes?: Set<string>;
   searchQuery?: string;
+  /** Optional ref that the parent can use to call fit() / png(). */
+  cyCallbackRef?: React.MutableRefObject<GraphCanvasHandle | null>;
 }
 
 export function GraphCanvas({
@@ -49,6 +58,7 @@ export function GraphCanvas({
   onEdgeClick,
   visibleTypes,
   searchQuery,
+  cyCallbackRef,
 }: GraphCanvasProps) {
   registerExtensions();
   const cyRef = useRef<Core | null>(null);
@@ -100,6 +110,14 @@ export function GraphCanvas({
       style={{ width: "100%", height: "100%" }}
       cy={(cy) => {
         cyRef.current = cy;
+        // Wire up the imperative handle so the parent page can call fit/png.
+        if (cyCallbackRef) {
+          cyCallbackRef.current = {
+            fit: () => cy.fit(),
+            png: () =>
+              cy.png({ output: "base64uri", bg: "#1a1b1e", full: true }) as string | undefined,
+          };
+        }
       }}
       layout={layoutOptions(layoutName)}
       wheelSensitivity={0.2}
