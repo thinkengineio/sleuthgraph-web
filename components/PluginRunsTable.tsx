@@ -4,7 +4,7 @@ import { ActionIcon, Badge, Table, Text, Tooltip } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 
 import type { PluginRunRead } from "@/lib/api";
-import { formatTs } from "@/lib/format";
+import { formatTs, relativeTime } from "@/lib/format";
 import { formatDuration, getPluginStatusMeta } from "@/lib/pluginStatus";
 
 interface PluginRunsTableProps {
@@ -63,7 +63,7 @@ export function PluginRunsTable({ items, onViewDetail }: PluginRunsTableProps) {
               <Table.Td>
                 <Tooltip label={formatTs(run.started_at)} withArrow>
                   <Text size="xs" c="dimmed">
-                    {formatTs(run.started_at)}
+                    {relativeTime(run.started_at)}
                   </Text>
                 </Tooltip>
               </Table.Td>
