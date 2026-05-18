@@ -63,7 +63,7 @@ describe("EvidenceUploadModal", () => {
     expect(uploadEvidenceMock).not.toHaveBeenCalled();
   });
 
-  it("shows notification when reproducibility_spec is invalid JSON", async () => {
+  it("shows no-file notification even when reproducibility_spec is set", async () => {
     renderModal();
 
     const queryInput = screen.getByLabelText(/query \/ description/i);
