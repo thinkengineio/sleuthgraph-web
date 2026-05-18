@@ -59,27 +59,45 @@ export default function GraphPage({ params }: PageProps) {
       }
     }
 
-    Promise.all([
+    Promise.allSettled([
       getGraph(caseId, signal),
       loadAll<EntityRead>((offset) => listEntities(caseId, { limit: PAGE, offset, signal })),
       loadAll<RelationshipRead>((offset) =>
         listRelationships(caseId, { limit: PAGE, offset, signal }),
       ),
-    ])
-      .then(([g, ents, rels]) => {
-        if (signal.aborted) return;
-        setDump(g);
-        setEntities(ents);
-        setRelationships(rels);
-      })
-      .catch((e: unknown) => {
-        if (signal.aborted) return;
+    ]).then(([graphResult, entitiesResult, relationshipsResult]) => {
+      if (signal.aborted) return;
+
+      const failures: string[] = [];
+
+      if (graphResult.status === "fulfilled") {
+        setDump(graphResult.value);
+      } else {
+        failures.push("graph");
+        // Set empty dump so the page exits the loading state
+        setDump({ vertices: [], edges: [] });
+      }
+
+      if (entitiesResult.status === "fulfilled") {
+        setEntities(entitiesResult.value);
+      } else {
+        failures.push("entities");
+      }
+
+      if (relationshipsResult.status === "fulfilled") {
+        setRelationships(relationshipsResult.value);
+      } else {
+        failures.push("relationships");
+      }
+
+      if (failures.length > 0) {
         notifications.show({
-          title: "Graph load failed",
-          message: e instanceof Error ? e.message : String(e),
-          color: "red",
+          title: "Partial graph load",
+          message: `Failed to load: ${failures.join(", ")}. Showing available data.`,
+          color: "yellow",
         });
-      });
+      }
+    });
     return () => {
       controller.abort();
     };
