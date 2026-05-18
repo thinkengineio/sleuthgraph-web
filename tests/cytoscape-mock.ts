@@ -87,9 +87,8 @@ export function makeFakeCy(): FakeCore {
  * React component that mirrors real react-cytoscapejs behaviour: it calls
  * the `cy` prop exactly once per mount with a stable FakeCore.
  */
-export function createCytoscapeMockFactory() {
-  // Dynamic import React inside the factory so it resolves at mock-init time.
-  const React = require("react");
+export async function createCytoscapeMockFactory() {
+  const React = await import("react");
 
   function CytoscapeMock({
     cy,

@@ -3,7 +3,6 @@ import { render, act } from "@testing-library/react";
 import { useRef } from "react";
 
 import {
-  type FakeCore,
   getLastFakeCy,
   resetCytoscapeMock,
 } from "./cytoscape-mock";
