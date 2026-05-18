@@ -63,6 +63,8 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
   const [entities, setEntities] = useState<EntityRead[]>([]);
   // Plugin list fetched once; passed down to EntityPanel → EntityDetailDrawer.
   const [plugins, setPlugins] = useState<PluginInfo[]>([]);
+  // Whether the listPlugins call failed — surfaces a non-blocking banner.
+  const [pluginsFailed, setPluginsFailed] = useState(false);
   // Bump to trigger re-fetch in all panels after a successful plugin run.
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -106,9 +108,12 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
         });
         // Fetch plugins in parallel — non-fatal if unavailable
         listPlugins()
-          .then((p) => setPlugins(p))
+          .then((p) => {
+            setPlugins(p);
+            setPluginsFailed(false);
+          })
           .catch(() => {
-            // Plugins are optional; silently degrade
+            setPluginsFailed(true);
           });
       }
     } catch (err: unknown) {
@@ -367,6 +372,18 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
           </Stack>
         </form>
       </Card>
+
+      {/* Plugins-unavailable banner */}
+      {pluginsFailed && (
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          title="Plugins unavailable"
+          color="yellow"
+          variant="light"
+        >
+          Could not load plugins. Plugin features may be limited until the service recovers.
+        </Alert>
+      )}
 
       {/* Entity panel — owns the entity list and propagates changes downward */}
       <EntityPanel
