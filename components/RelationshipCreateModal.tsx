@@ -65,7 +65,11 @@ export function RelationshipCreateModal({
     },
     validate: {
       src_entity_id: (v) => (v ? null : "Source entity is required"),
-      dst_entity_id: (v) => (v ? null : "Destination entity is required"),
+      dst_entity_id: (v, values) => {
+        if (!v) return "Destination entity is required";
+        if (v === values.src_entity_id) return "Source and destination must be different entities";
+        return null;
+      },
       rel_type: (v) => (v ? null : "Relationship type is required"),
       confidence: (v) => (v < 0 || v > 1 ? "Confidence must be between 0.0 and 1.0" : null),
     },

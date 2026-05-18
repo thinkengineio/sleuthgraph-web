@@ -1,4 +1,5 @@
 import { screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { RelationshipCreateModal } from "@/components/RelationshipCreateModal";
@@ -119,22 +120,57 @@ describe("RelationshipCreateModal", () => {
     expect(createRelationshipMock).not.toHaveBeenCalled();
   });
 
-  it("shows invalid JSON notification when attrs contains malformed JSON", async () => {
+  it("shows required field error when source entity is missing despite invalid attrs", async () => {
     renderModal();
-    // Enter bad JSON in attrs without selecting selects (validation happens before attrs check
-    // only when selects are filled; test attrs parse by mocking form bypass)
-    // Put invalid JSON in attrs
+    // Enter bad JSON in attrs without selecting required selects — required-field
+    // validation fires first, so the attrs parse error is never reached.
     const attrsArea = screen.getByPlaceholderText(/note/i);
     fireEvent.change(attrsArea, { target: { value: "{not valid json" } });
 
-    // Submit will first fail on required selects — so test attrs error in isolation
-    // by verifying the notification would fire when attrs is invalid
-    // The EvidenceUploadModal pattern: attrs is checked before the API call.
-    // Here, required fields prevent reaching attrs; this tests the validation order.
     fireEvent.click(screen.getByRole("button", { name: /create relationship/i }));
     await waitFor(() => {
-      // Required fields fail first — attrs error not shown yet
       expect(screen.getByText(/source entity is required/i)).toBeInTheDocument();
+    });
+    expect(createRelationshipMock).not.toHaveBeenCalled();
+  });
+
+  it("shows self-loop error when source and destination are the same entity", async () => {
+    renderModal();
+    const user = userEvent.setup();
+    const [srcInput, dstInput] = screen.getAllByPlaceholderText(/search entities/i);
+
+    // Select "Person: Alice" (ent-aaa) as source via combobox option
+    await user.click(srcInput);
+    await waitFor(() => {
+      const opts = document.querySelectorAll("[data-combobox-option][value='ent-aaa']");
+      expect(opts.length).toBeGreaterThan(0);
+    });
+    await user.click(document.querySelector("[data-combobox-option][value='ent-aaa']") as HTMLElement);
+
+    // Select the same entity (ent-aaa) as destination
+    await user.click(dstInput);
+    await waitFor(() => {
+      const opts = document.querySelectorAll("[data-combobox-option][value='ent-aaa']");
+      expect(opts.length).toBeGreaterThan(0);
+    });
+    const dstOpts = document.querySelectorAll("[data-combobox-option][value='ent-aaa']");
+    await user.click(dstOpts[dstOpts.length - 1] as HTMLElement);
+
+    // Select a relationship type to satisfy that validator
+    const relTypeInput = screen.getAllByPlaceholderText(/select type/i)[0];
+    await user.click(relTypeInput);
+    await waitFor(() => {
+      expect(screen.getByText("OWNS")).toBeInTheDocument();
+    });
+    await user.click(screen.getByText("OWNS"));
+
+    // Submit
+    await user.click(screen.getByRole("button", { name: /create relationship/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/source and destination must be different entities/i),
+      ).toBeInTheDocument();
     });
     expect(createRelationshipMock).not.toHaveBeenCalled();
   });
