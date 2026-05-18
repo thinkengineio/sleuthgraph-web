@@ -26,16 +26,7 @@ import { IconArchive, IconFolder, IconFolderOpen, IconPlus, IconTrash } from "@t
 
 import { Case, CaseCreate, createCase, deleteCase, listCases, updateCase } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
-
-function formatTs(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { formatTs } from "@/lib/format";
 
 interface CreateFormValues {
   name: string;
