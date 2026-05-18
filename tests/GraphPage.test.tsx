@@ -8,12 +8,11 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-// Stub react-cytoscapejs so jsdom doesn't crash on canvas
-vi.mock("react-cytoscapejs", () => ({
-  default: ({ style }: { style?: React.CSSProperties }) => (
-    <div data-testid="cytoscape-stub" style={style} />
-  ),
-}));
+// Use shared cytoscape mock with handler tracking + layout spies.
+vi.mock("react-cytoscapejs", async () => {
+  const { createCytoscapeMockFactory } = await import("./cytoscape-mock");
+  return createCytoscapeMockFactory();
+});
 
 // Mock API functions
 vi.mock("@/lib/api", async (importOriginal) => {

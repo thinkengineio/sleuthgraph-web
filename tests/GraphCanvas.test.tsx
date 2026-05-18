@@ -2,89 +2,21 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, act } from "@testing-library/react";
 import { useRef } from "react";
 
-// Smart mock: captures the `cy={...}` callback and invokes it with a fake Core
-// exposing `on`/`off`/`layout`/`nodes`/`batch`/`fit`/`png` jest spies.
-// This lets tests exercise the real useEffect bindings in GraphCanvas.
-type TapHandler = (e: { target: { id: () => string } }) => void;
-
-interface FakeCore {
-  on: ReturnType<typeof vi.fn>;
-  off: ReturnType<typeof vi.fn>;
-  layout: ReturnType<typeof vi.fn>;
-  nodes: ReturnType<typeof vi.fn>;
-  batch: ReturnType<typeof vi.fn>;
-  fit: ReturnType<typeof vi.fn>;
-  png: ReturnType<typeof vi.fn>;
-  __handlers: {
-    node: TapHandler[];
-    edge: TapHandler[];
-  };
-}
-
-let lastFakeCy: FakeCore | null = null;
-
-function makeFakeCy(): FakeCore {
-  const handlers: FakeCore["__handlers"] = { node: [], edge: [] };
-  const layoutRun = vi.fn();
-  const layout = vi.fn(() => ({ run: layoutRun }));
-  const on = vi.fn((event: string, selector: string, handler: TapHandler) => {
-    if (event === "tap" && selector === "node") handlers.node.push(handler);
-    if (event === "tap" && selector === "edge") handlers.edge.push(handler);
-  });
-  const off = vi.fn((event: string, selector: string, handler: TapHandler) => {
-    if (event === "tap" && selector === "node") {
-      handlers.node = handlers.node.filter((h) => h !== handler);
-    }
-    if (event === "tap" && selector === "edge") {
-      handlers.edge = handlers.edge.filter((h) => h !== handler);
-    }
-  });
-  const nodesArr: Array<{ data: (k: string) => unknown; style: ReturnType<typeof vi.fn> }> = [];
-  const nodes = vi.fn(() => ({
-    forEach: (cb: (n: (typeof nodesArr)[number]) => void) => nodesArr.forEach(cb),
-  }));
-  const batch = vi.fn((fn: () => void) => fn());
-  const fit = vi.fn();
-  const png = vi.fn(() => "data:image/png;base64,FAKE");
-  return {
-    on,
-    off,
-    layout,
-    nodes,
-    batch,
-    fit,
-    png,
-    __handlers: handlers,
-  };
-}
+import {
+  type FakeCore,
+  getLastFakeCy,
+  resetCytoscapeMock,
+} from "./cytoscape-mock";
 
 vi.mock("react-cytoscapejs", async () => {
-  const React = await vi.importActual<typeof import("react")>("react");
-  function CytoscapeMock({
-    cy,
-    style,
-  }: {
-    cy?: (c: FakeCore) => void;
-    style?: React.CSSProperties;
-  }) {
-    // Real react-cytoscapejs invokes `cy` exactly once per mount with a
-    // stable Core instance. Mirror that: lazy-init via useRef so we don't
-    // thrash parent state with a fresh fake on every render.
-    const ref = React.useRef<FakeCore | null>(null);
-    if (!ref.current) {
-      ref.current = makeFakeCy();
-      lastFakeCy = ref.current;
-      if (cy) cy(ref.current);
-    }
-    return <div data-testid="cytoscape-stub" style={style} />;
-  }
-  return { default: CytoscapeMock };
+  const { createCytoscapeMockFactory } = await import("./cytoscape-mock");
+  return createCytoscapeMockFactory();
 });
 
 import { GraphCanvas, type GraphCanvasHandle } from "@/components/graph/GraphCanvas";
 
 beforeEach(() => {
-  lastFakeCy = null;
+  resetCytoscapeMock();
 });
 
 describe("GraphCanvas", () => {
@@ -138,8 +70,8 @@ describe("GraphCanvas", () => {
         onEdgeClick={vi.fn()}
       />,
     );
-    expect(lastFakeCy).not.toBeNull();
-    const cy = lastFakeCy!;
+    expect(getLastFakeCy()).not.toBeNull();
+    const cy = getLastFakeCy()!;
     expect(cy.on).toHaveBeenCalledWith("tap", "node", expect.any(Function));
     expect(cy.__handlers.node.length).toBeGreaterThan(0);
     // Invoke the captured handler with a fake event.
@@ -157,7 +89,7 @@ describe("GraphCanvas", () => {
         onEdgeClick={onEdgeClick}
       />,
     );
-    const cy = lastFakeCy!;
+    const cy = getLastFakeCy()!;
     expect(cy.on).toHaveBeenCalledWith("tap", "edge", expect.any(Function));
     cy.__handlers.edge[0]({ target: { id: () => "e42" } });
     expect(onEdgeClick).toHaveBeenCalledWith("e42");
@@ -172,7 +104,7 @@ describe("GraphCanvas", () => {
         onEdgeClick={vi.fn()}
       />,
     );
-    const cy = lastFakeCy!;
+    const cy = getLastFakeCy()!;
     // The initial layout-effect runs once on mount.
     const initialCalls = cy.layout.mock.calls.length;
     rerender(
@@ -196,7 +128,7 @@ describe("GraphCanvas", () => {
         searchQuery="foo"
       />,
     );
-    const cy = lastFakeCy!;
+    const cy = getLastFakeCy()!;
     const initialBatch = cy.batch.mock.calls.length;
     rerender(
       <GraphCanvas
@@ -233,7 +165,7 @@ describe("GraphCanvas", () => {
     act(() => {
       handleRef.current?.fit();
     });
-    expect(lastFakeCy!.fit).toHaveBeenCalled();
+    expect(getLastFakeCy()!.fit).toHaveBeenCalled();
     expect(handleRef.current?.png()).toBe("data:image/png;base64,FAKE");
     rerender(<Harness unmount={true} />);
     expect(handleRef.current).toBeNull();
