@@ -450,14 +450,16 @@ export type EntityUpdate = {
  */
 export async function listEntities(
   caseId: string,
-  opts: { type?: EntityType; limit?: number; offset?: number } = {},
+  opts: { type?: EntityType; limit?: number; offset?: number; signal?: AbortSignal } = {},
 ): Promise<EntityRead[]> {
   const qs = new URLSearchParams();
   if (opts.type) qs.set("type", opts.type);
   if (opts.limit != null) qs.set("limit", String(opts.limit));
   if (opts.offset != null) qs.set("offset", String(opts.offset));
   const query = qs.toString();
-  const res = await apiFetch(`/cases/${caseId}/entities${query ? `?${query}` : ""}`);
+  const res = await apiFetch(`/cases/${caseId}/entities${query ? `?${query}` : ""}`, {
+    signal: opts.signal,
+  });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
@@ -686,6 +688,7 @@ export async function listRelationships(
     dst?: string;
     limit?: number;
     offset?: number;
+    signal?: AbortSignal;
   } = {},
 ): Promise<RelationshipRead[]> {
   const qs = new URLSearchParams();
@@ -695,7 +698,9 @@ export async function listRelationships(
   if (opts.limit != null) qs.set("limit", String(opts.limit));
   if (opts.offset != null) qs.set("offset", String(opts.offset));
   const query = qs.toString();
-  const res = await apiFetch(`/cases/${caseId}/relationships${query ? `?${query}` : ""}`);
+  const res = await apiFetch(`/cases/${caseId}/relationships${query ? `?${query}` : ""}`, {
+    signal: opts.signal,
+  });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
@@ -765,7 +770,8 @@ export type GraphDump = {
 
 /**
  * GET /cases/{caseId}/graph — fetch flat graph dump for a case.
+ * Accepts an optional AbortSignal to cancel in-flight requests.
  */
-export async function getGraph(caseId: string): Promise<GraphDump> {
-  return request<GraphDump>(`/cases/${caseId}/graph`);
+export async function getGraph(caseId: string, signal?: AbortSignal): Promise<GraphDump> {
+  return request<GraphDump>(`/cases/${caseId}/graph`, { signal });
 }

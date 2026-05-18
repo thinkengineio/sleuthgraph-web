@@ -41,7 +41,8 @@ export default function GraphPage({ params }: PageProps) {
   const [selectedRel, setSelectedRel] = useState<RelationshipRead | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
+    const { signal } = controller;
 
     // List endpoints cap limit at 200, so page through them. The graph dump
     // itself is already up to 10k — it's the source of truth for the canvas;
@@ -59,18 +60,20 @@ export default function GraphPage({ params }: PageProps) {
     }
 
     Promise.all([
-      getGraph(caseId),
-      loadAll<EntityRead>((offset) => listEntities(caseId, { limit: PAGE, offset })),
-      loadAll<RelationshipRead>((offset) => listRelationships(caseId, { limit: PAGE, offset })),
+      getGraph(caseId, signal),
+      loadAll<EntityRead>((offset) => listEntities(caseId, { limit: PAGE, offset, signal })),
+      loadAll<RelationshipRead>((offset) =>
+        listRelationships(caseId, { limit: PAGE, offset, signal }),
+      ),
     ])
       .then(([g, ents, rels]) => {
-        if (cancelled) return;
+        if (signal.aborted) return;
         setDump(g);
         setEntities(ents);
         setRelationships(rels);
       })
       .catch((e: unknown) => {
-        if (cancelled) return;
+        if (signal.aborted) return;
         notifications.show({
           title: "Graph load failed",
           message: e instanceof Error ? e.message : String(e),
@@ -78,7 +81,7 @@ export default function GraphPage({ params }: PageProps) {
         });
       });
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, [caseId]);
 
