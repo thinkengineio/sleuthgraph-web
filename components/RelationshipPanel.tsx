@@ -7,7 +7,7 @@ import { notifications } from "@mantine/notifications";
 import { IconLink, IconX } from "@tabler/icons-react";
 
 import type { EntityRead, RelationshipRead } from "@/lib/api";
-import { listRelationships } from "@/lib/api";
+import { deleteRelationship, listRelationships } from "@/lib/api";
 import { RelationshipCreateModal } from "./RelationshipCreateModal";
 import { RelationshipDetailDrawer } from "./RelationshipDetailDrawer";
 import { RelationshipTable } from "./RelationshipTable";
@@ -59,9 +59,23 @@ export function RelationshipPanel({ caseId, entities, refreshToken = 0 }: Relati
   }
 
   async function handleTableDelete(rel: RelationshipRead) {
-    // Delegate to the drawer logic by opening it? No — inline confirmation matches EvidencePanel pattern.
-    // RelationshipDetailDrawer handles its own confirm; for table-row we open the drawer.
-    setDetailRel(rel);
+    if (!window.confirm(`Delete this ${rel.rel_type} relationship? This cannot be undone.`)) return;
+    try {
+      await deleteRelationship(caseId, rel.id);
+      notifications.show({
+        title: "Relationship deleted",
+        message: `${rel.rel_type} link removed.`,
+        color: "orange",
+      });
+      handleDeleted(rel.id);
+    } catch (err: unknown) {
+      notifications.show({
+        title: "Delete failed",
+        message: err instanceof Error ? err.message : "Unknown error",
+        color: "red",
+        icon: <IconX size={14} />,
+      });
+    }
   }
 
   return (
