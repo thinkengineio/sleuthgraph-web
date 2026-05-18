@@ -4,14 +4,14 @@ Frontend for [Sleuthgraph](https://sleuthgraph.io) — an OSINT investigation wo
 
 ## Tech stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (App Router, standalone output) |
-| Language | TypeScript 5 |
-| UI library | Mantine v8 (dark theme by default) |
-| Graph viz | Cytoscape.js + react-cytoscapejs |
-| Styling | Tailwind CSS v4 |
-| Testing | Vitest + Testing Library |
+| Layer      | Technology                                 |
+| ---------- | ------------------------------------------ |
+| Framework  | Next.js 16 (App Router, standalone output) |
+| Language   | TypeScript 5                               |
+| UI library | Mantine v8 (dark theme by default)         |
+| Graph viz  | Cytoscape.js + react-cytoscapejs           |
+| Styling    | Tailwind CSS v4                            |
+| Testing    | Vitest + Testing Library                   |
 
 ## Local development
 
@@ -31,9 +31,9 @@ Open http://localhost:3000.
 
 ## Environment variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Yes | Base URL of the Sleuthgraph API (e.g. `http://localhost:8000`) |
+| Variable              | Required | Description                                                    |
+| --------------------- | -------- | -------------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | Yes      | Base URL of the Sleuthgraph API (e.g. `http://localhost:8000`) |
 
 All `NEXT_PUBLIC_*` variables are baked into the client bundle at build time. Do not put secrets in them.
 
@@ -79,14 +79,14 @@ Note: `NEXT_PUBLIC_API_URL` is a build-time variable baked into the bundle. If y
 
 ## Key pages
 
-| Route | Description |
-|-------|-------------|
-| `/` | Landing / home |
-| `/login` | Email + SSO sign-in |
-| `/register` | Account creation |
-| `/cases` | Case list |
-| `/cases/[caseId]` | Case detail + evidence |
-| `/cases/[caseId]/graph` | Cytoscape graph view |
+| Route                   | Description            |
+| ----------------------- | ---------------------- |
+| `/`                     | Landing / home         |
+| `/login`                | Email + SSO sign-in    |
+| `/register`             | Account creation       |
+| `/cases`                | Case list              |
+| `/cases/[caseId]`       | Case detail + evidence |
+| `/cases/[caseId]/graph` | Cytoscape graph view   |
 
 ## License
 
