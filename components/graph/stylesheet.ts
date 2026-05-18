@@ -25,6 +25,7 @@ const REL_COLOR_HEX: Record<RelationshipType | "DEFAULT", string> = {
   ASSOCIATED_WITH: "#868e96",
   COMMUNICATED_WITH: "#e8590c",
   MENTIONS: "#ae3ec9",
+  SUBDOMAIN_OF: "#3bc9db",
   DEFAULT: "#495057",
 };
 

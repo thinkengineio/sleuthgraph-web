@@ -633,7 +633,8 @@ export type RelationshipType =
   | "RESOLVES_TO"
   | "ASSOCIATED_WITH"
   | "COMMUNICATED_WITH"
-  | "MENTIONS";
+  | "MENTIONS"
+  | "SUBDOMAIN_OF";
 
 export type RelationshipRead = {
   id: string;

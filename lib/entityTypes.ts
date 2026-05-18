@@ -58,6 +58,7 @@ export const RELATIONSHIP_TYPES = [
   "ASSOCIATED_WITH",
   "COMMUNICATED_WITH",
   "MENTIONS",
+  "SUBDOMAIN_OF",
 ] as const;
 
 export type RelationshipType = (typeof RELATIONSHIP_TYPES)[number];
