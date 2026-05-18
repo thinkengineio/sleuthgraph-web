@@ -77,8 +77,18 @@ const INITIAL_STATE: ModalState = {
  */
 function errorHint(msg: string | null): string | null {
   if (!msg) return null;
+  // 401 check takes priority — session may have expired
+  if (msg.includes("401"))
+    return "Your session may have expired. Try refreshing the page.";
   if (msg.startsWith("upstream_http_error")) return "The external service returned an HTTP error.";
   if (msg.startsWith("upstream_timeout")) return "The external service did not respond in time.";
+  if (msg.startsWith("upstream_parse_error"))
+    return "The external service returned an unparsable response.";
+  if (msg.startsWith("invalid_response"))
+    return "The plugin received an unexpected response format.";
+  if (msg.startsWith("rate_limited")) return "Rate limited — wait a moment and try again.";
+  if (msg.startsWith("plugin_auth_failed"))
+    return "Plugin credentials are invalid or expired.";
   if (msg.startsWith("type_mismatch"))
     return "This plugin does not accept the selected entity type.";
   if (msg.startsWith("plugin execution failed"))
