@@ -29,8 +29,7 @@ function renderToolbar(overrides: Partial<Parameters<typeof GraphToolbar>[0]> = 
 describe("GraphToolbar", () => {
   it("renders stat text with entity and relationship counts", () => {
     renderToolbar({ entityCount: 7, relationshipCount: 4 });
-    expect(screen.getByText(/7/)).toBeInTheDocument();
-    expect(screen.getByText(/4/)).toBeInTheDocument();
+    expect(screen.getByText("7 entities, 4 relationships")).toBeInTheDocument();
   });
 
   it("calls onSearchChange when user types in search box", async () => {
