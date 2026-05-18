@@ -154,16 +154,42 @@ export function GraphCanvas({
     };
   }, [cy, cyCallbackRef]);
 
+  const entityCount = dump.vertices.length;
+  const relationshipCount = dump.edges.length;
+
   return (
-    <CytoscapeComponent
-      elements={elements}
-      stylesheet={stylesheet}
-      style={{ width: "100%", height: "100%" }}
-      cy={(instance) => {
-        setCy(instance);
-      }}
-      layout={layoutOptions(layoutName)}
-      wheelSensitivity={0.2}
-    />
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
+      <div
+        role="img"
+        aria-label={`Investigation graph — ${entityCount} entities, ${relationshipCount} relationships`}
+        style={{ width: "100%", height: "100%" }}
+      >
+        <CytoscapeComponent
+          elements={elements}
+          stylesheet={stylesheet}
+          style={{ width: "100%", height: "100%" }}
+          cy={(instance) => {
+            setCy(instance);
+          }}
+          layout={layoutOptions(layoutName)}
+          wheelSensitivity={0.2}
+        />
+      </div>
+      <span
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: "hidden",
+          clip: "rect(0, 0, 0, 0)",
+          whiteSpace: "nowrap",
+          borderWidth: 0,
+        }}
+      >
+        Graph entities: {dump.vertices.map((v) => `${v.label} (${v.type})`).join(", ") || "none"}
+      </span>
+    </div>
   );
 }
