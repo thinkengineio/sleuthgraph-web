@@ -154,6 +154,19 @@ export function GraphCanvas({
     };
   }, [cy, cyCallbackRef]);
 
+  // Expose the Cytoscape core on window for E2E tests (Playwright).
+  // Stripped from production builds by the bundler since the branch is
+  // dead-code-eliminated when NODE_ENV === "production".
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production" || !cy) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__cyInstance = cy;
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).__cyInstance;
+    };
+  }, [cy]);
+
   const entityCount = dump.vertices.length;
   const relationshipCount = dump.edges.length;
 

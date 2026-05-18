@@ -6,6 +6,13 @@ import { expect, test, type Page } from "@playwright/test";
 
 const CASE_ID = "c0000000-0000-0000-0000-000000000001";
 
+/**
+ * API base URL used by the frontend (lib/api.ts getApiBaseUrl()).
+ * Routes are scoped to this origin so that page.route() does NOT
+ * intercept Next.js page navigations on localhost:3000.
+ */
+const API_ORIGIN = "http://localhost:8000";
+
 const ENTITIES = [
   {
     id: "e0000000-0000-0000-0000-000000000001",
@@ -122,6 +129,9 @@ const USER_ME = {
 /**
  * Intercept all API calls the graph page makes and return fixture data.
  *
+ * Routes are scoped to API_ORIGIN (localhost:8000) so they do NOT intercept
+ * the Next.js page HTML served from localhost:3000.
+ *
  * The page hits three endpoints on mount (via Promise.allSettled):
  *   1. GET /cases/{caseId}/graph
  *   2. GET /cases/{caseId}/entities?limit=200&offset=0
@@ -131,13 +141,13 @@ const USER_ME = {
  * Without mocking it the 401 interceptor redirects to /login.
  */
 async function mockGraphApi(page: Page): Promise<void> {
-  // Auth — return a valid user so the app does not redirect to /login.
-  await page.route("**/users/me", (route) =>
+  // Auth -- return a valid user so the app does not redirect to /login.
+  await page.route(`${API_ORIGIN}/users/me`, (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(USER_ME) }),
   );
 
   // Graph dump
-  await page.route(`**/cases/${CASE_ID}/graph`, (route) =>
+  await page.route(`${API_ORIGIN}/cases/${CASE_ID}/graph`, (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -145,8 +155,8 @@ async function mockGraphApi(page: Page): Promise<void> {
     }),
   );
 
-  // Entities list (paginated — return all in first page)
-  await page.route(`**/cases/${CASE_ID}/entities**`, (route) =>
+  // Entities list (paginated -- return all in first page)
+  await page.route(`${API_ORIGIN}/cases/${CASE_ID}/entities**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -154,8 +164,8 @@ async function mockGraphApi(page: Page): Promise<void> {
     }),
   );
 
-  // Relationships list (paginated — return all in first page)
-  await page.route(`**/cases/${CASE_ID}/relationships**`, (route) =>
+  // Relationships list (paginated -- return all in first page)
+  await page.route(`${API_ORIGIN}/cases/${CASE_ID}/relationships**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -206,57 +216,22 @@ test.describe("Graph visualization page", () => {
     await expect(page.getByRole("img", { name: /investigation graph/i })).toBeVisible();
 
     // Cytoscape renders to <canvas> so we cannot click a DOM node directly.
-    // Instead we use page.evaluate() to programmatically emit a "tap" event
-    // on the first entity node, which triggers the onNodeClick callback and
-    // sets selectedEntity — opening the EntityDetailDrawer.
-    //
-    // The GraphCanvas component stores the Cytoscape core instance in React
-    // state. We locate the CytoscapeComponent's container and use Cytoscape's
-    // API to emit the tap. The cy instance is exposed on the container's
-    // __cy property by react-cytoscapejs internals, or we find it via the
-    // cytoscape scratch data on the canvas parent.
-    //
-    // Robust approach: find the cy instance on the page's CytoscapeComponent
-    // container element and emit a tap on a known node ID.
+    // GraphCanvas exposes the Cytoscape core on window.__cyInstance in
+    // non-production builds (see the useEffect hook in GraphCanvas.tsx).
+    // We use page.evaluate() to emit a "tap" event on the target node,
+    // which triggers onNodeClick -> sets selectedEntity -> opens the drawer.
     const targetEntityId = ENTITIES[0].id;
 
     await page.evaluate((nodeId: string) => {
-      // react-cytoscapejs stores the cy instance; find it via the global
-      // Cytoscape registry or by traversing the component's canvas parent.
-      // The library sets cy on the container div as a data attribute.
-      // Fallback: find all canvas elements and look for cy on parent.
-      const containers = document.querySelectorAll("[data-cy]");
-      // If react-cytoscapejs does not expose data-cy, walk the DOM to find
-      // a div whose child is a <canvas> used by Cytoscape.
-      let cy: unknown = null;
-
-      // Attempt 1: window-level Cytoscape instances (not always available)
-      // Attempt 2: traverse from the role="img" container
-      const imgContainer = document.querySelector('[role="img"]');
-      if (imgContainer) {
-        const innerDiv = imgContainer.querySelector("div");
-        if (innerDiv) {
-          // react-cytoscapejs sets _cy on the component instance, but we can
-          // access it through the Cytoscape extension: the div has a ._cyreg
-          // property, or the <CytoscapeComponent> sets cy on its wrapper.
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          cy = (innerDiv as any)._cyreg?.cy ?? (innerDiv as any).__cy;
-        }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cy = (window as any).__cyInstance;
+      if (!cy || typeof cy.$ !== "function") {
+        throw new Error(
+          "window.__cyInstance not found. " +
+            "GraphCanvas exposes it in non-production builds (NODE_ENV !== 'production').",
+        );
       }
-
-      // If we found the cy instance, emit a tap on the target node.
-      if (cy && typeof (cy as Record<string, unknown>)["$"] === "function") {
-        const core = cy as {
-          $: (sel: string) => { emit: (evt: string) => void };
-        };
-        core.$(`#${nodeId}`).emit("tap");
-        return;
-      }
-
-      // Last resort: we were unable to reach the Cytoscape instance.
-      // The test will still assert that the drawer appeared (it won't) and
-      // will fail clearly rather than silently passing.
-      throw new Error("Could not locate Cytoscape instance on page");
+      cy.$(`#${nodeId}`).emit("tap");
     }, targetEntityId);
 
     // The EntityDetailDrawer uses title="Entity Detail" on the Mantine Drawer.
