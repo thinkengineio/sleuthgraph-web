@@ -74,7 +74,6 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
 
   function handlePluginRunSuccess(_result: PluginRunResponse) {
     setRefreshToken((t) => t + 1);
-    void _result; // result unused; only presence of success matters
   }
 
   const form = useForm<EditFormValues>({

@@ -12,14 +12,13 @@ import {
   Modal,
   Stack,
   Text,
-  Title,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlayerPlay, IconRefresh, IconX } from "@tabler/icons-react";
 
 import type { EntityRead, PluginInfo, PluginRunResponse } from "@/lib/api";
 import { runPlugin } from "@/lib/api";
-import { formatElapsed } from "@/lib/pluginStatus";
+import { formatDuration, formatElapsed } from "@/lib/pluginStatus";
 import { EntityTypeBadge } from "./EntityTypeBadge";
 
 // ── State machine ────────────────────────────────────────────────────────────
@@ -232,9 +231,9 @@ export function RunPluginModal({
               <Text size="xs" c="dimmed">
                 This typically takes 5–30s
               </Text>
-              <Title order={4} ff="monospace">
+              <Text ff="monospace" fw={700}>
                 {formatElapsed(state.elapsed)}
-              </Title>
+              </Text>
               <Button variant="subtle" color="gray" size="xs" disabled>
                 Close (running…)
               </Button>
@@ -247,7 +246,7 @@ export function RunPluginModal({
               <Stack align="center" gap="xs" py="xs">
                 <IconCheck size={32} color="var(--mantine-color-green-5)" />
                 <Text fw={500} c="green">
-                  Plugin succeeded in {state.elapsed.toFixed(0)}s
+                  Plugin succeeded in {formatDuration(state.result.run.started_at, state.result.run.finished_at)}
                 </Text>
               </Stack>
 
@@ -276,7 +275,9 @@ export function RunPluginModal({
           )}
 
           {/* ── ERROR ── */}
-          {state.phase === "error" && (
+          {state.phase === "error" && (() => {
+            const hint = errorHint(state.errorMessage);
+            return (
             <>
               <Stack align="center" gap="xs" py="xs">
                 <IconX size={32} color="var(--mantine-color-red-5)" />
@@ -294,9 +295,9 @@ export function RunPluginModal({
                 </Stack>
               )}
 
-              {errorHint(state.errorMessage) && (
+              {hint && (
                 <Text size="xs" c="dimmed">
-                  {errorHint(state.errorMessage)}
+                  {hint}
                 </Text>
               )}
 
@@ -319,7 +320,8 @@ export function RunPluginModal({
                 </Button>
               </Group>
             </>
-          )}
+            );
+          })()}
         </Stack>
       )}
     </Modal>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Box,
@@ -78,6 +78,11 @@ export function EntityDetailDrawer({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [runModalPlugin, setRunModalPlugin] = useState<PluginInfo | null>(null);
+
+  const applicablePlugins = useMemo(
+    () => (entity ? plugins.filter((p) => p.entity_types_accepted.includes(entity.type)) : []),
+    [plugins, entity],
+  );
 
   const form = useForm<EditFormValues>({
     initialValues: {
@@ -336,17 +341,14 @@ export function EntityDetailDrawer({
             )}
 
             {/* Applicable plugins — only shown outside edit mode when at least one plugin matches */}
-            {!editMode &&
-              plugins.filter((p) => p.entity_types_accepted.includes(entity.type)).length > 0 && (
+            {!editMode && applicablePlugins.length > 0 && (
                 <>
                   <Divider />
                   <Stack gap="xs">
                     <Text size="xs" c="dimmed" fw={500}>
                       Run plugin
                     </Text>
-                    {plugins
-                      .filter((p) => p.entity_types_accepted.includes(entity.type))
-                      .map((p) => (
+                    {applicablePlugins.map((p) => (
                         <Button
                           key={p.name}
                           variant="light"
