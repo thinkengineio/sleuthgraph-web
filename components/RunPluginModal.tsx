@@ -2,17 +2,7 @@
 
 import { useEffect, useReducer, useRef } from "react";
 
-import {
-  Badge,
-  Button,
-  Code,
-  Divider,
-  Group,
-  Loader,
-  Modal,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Badge, Button, Code, Divider, Group, Loader, Modal, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconPlayerPlay, IconRefresh, IconX } from "@tabler/icons-react";
 
@@ -77,8 +67,7 @@ const INITIAL_STATE: ModalState = {
 function errorHint(msg: string | null): string | null {
   if (!msg) return null;
   // 401 check takes priority — session may have expired
-  if (msg.includes("401"))
-    return "Your session may have expired. Try refreshing the page.";
+  if (msg.includes("401")) return "Your session may have expired. Try refreshing the page.";
   if (msg.startsWith("upstream_http_error")) return "The external service returned an HTTP error.";
   if (msg.startsWith("upstream_timeout")) return "The external service did not respond in time.";
   if (msg.startsWith("upstream_parse_error"))
@@ -86,8 +75,7 @@ function errorHint(msg: string | null): string | null {
   if (msg.startsWith("invalid_response"))
     return "The plugin received an unexpected response format.";
   if (msg.startsWith("rate_limited")) return "Rate limited — wait a moment and try again.";
-  if (msg.startsWith("plugin_auth_failed"))
-    return "Plugin credentials are invalid or expired.";
+  if (msg.startsWith("plugin_auth_failed")) return "Plugin credentials are invalid or expired.";
   if (msg.startsWith("type_mismatch"))
     return "This plugin does not accept the selected entity type.";
   if (msg.startsWith("plugin execution failed"))
@@ -246,7 +234,8 @@ export function RunPluginModal({
               <Stack align="center" gap="xs" py="xs">
                 <IconCheck size={32} color="var(--mantine-color-green-5)" />
                 <Text fw={500} c="green">
-                  Plugin succeeded in {formatDuration(state.result.run.started_at, state.result.run.finished_at)}
+                  Plugin succeeded in{" "}
+                  {formatDuration(state.result.run.started_at, state.result.run.finished_at)}
                 </Text>
               </Stack>
 
@@ -275,53 +264,54 @@ export function RunPluginModal({
           )}
 
           {/* ── ERROR ── */}
-          {state.phase === "error" && (() => {
-            const hint = errorHint(state.errorMessage);
-            return (
-            <>
-              <Stack align="center" gap="xs" py="xs">
-                <IconX size={32} color="var(--mantine-color-red-5)" />
-                <Text fw={500} c="red">
-                  Plugin failed
-                </Text>
-              </Stack>
+          {state.phase === "error" &&
+            (() => {
+              const hint = errorHint(state.errorMessage);
+              return (
+                <>
+                  <Stack align="center" gap="xs" py="xs">
+                    <IconX size={32} color="var(--mantine-color-red-5)" />
+                    <Text fw={500} c="red">
+                      Plugin failed
+                    </Text>
+                  </Stack>
 
-              {state.errorMessage && (
-                <Stack gap={4}>
-                  <Text size="xs" c="dimmed" fw={500}>
-                    Error detail
-                  </Text>
-                  <Code block>{state.errorMessage}</Code>
-                </Stack>
-              )}
+                  {state.errorMessage && (
+                    <Stack gap={4}>
+                      <Text size="xs" c="dimmed" fw={500}>
+                        Error detail
+                      </Text>
+                      <Code block>{state.errorMessage}</Code>
+                    </Stack>
+                  )}
 
-              {hint && (
-                <Text size="xs" c="dimmed">
-                  {hint}
-                </Text>
-              )}
+                  {hint && (
+                    <Text size="xs" c="dimmed">
+                      {hint}
+                    </Text>
+                  )}
 
-              <Divider />
+                  <Divider />
 
-              <Group justify="flex-end" gap="xs">
-                <Button variant="subtle" color="gray" size="sm" onClick={handleClose}>
-                  Close
-                </Button>
-                <Button
-                  size="sm"
-                  variant="light"
-                  color="orange"
-                  leftSection={<IconRefresh size={14} />}
-                  onClick={() => {
-                    dispatch({ type: "RESET" });
-                  }}
-                >
-                  Retry
-                </Button>
-              </Group>
-            </>
-            );
-          })()}
+                  <Group justify="flex-end" gap="xs">
+                    <Button variant="subtle" color="gray" size="sm" onClick={handleClose}>
+                      Close
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="light"
+                      color="orange"
+                      leftSection={<IconRefresh size={14} />}
+                      onClick={() => {
+                        dispatch({ type: "RESET" });
+                      }}
+                    >
+                      Retry
+                    </Button>
+                  </Group>
+                </>
+              );
+            })()}
         </Stack>
       )}
     </Modal>

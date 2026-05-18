@@ -2,10 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, act } from "@testing-library/react";
 import { useRef } from "react";
 
-import {
-  getLastFakeCy,
-  resetCytoscapeMock,
-} from "./cytoscape-mock";
+import { getLastFakeCy, resetCytoscapeMock } from "./cytoscape-mock";
 
 vi.mock("react-cytoscapejs", async () => {
   const { createCytoscapeMockFactory } = await import("./cytoscape-mock");

@@ -56,9 +56,7 @@ describe("401 interceptor", () => {
   it("redirects to /login on 401 from a non-auth endpoint via apiFetch", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response("Unauthorized", { status: 401 }),
-      ),
+      vi.fn().mockResolvedValue(new Response("Unauthorized", { status: 401 })),
     );
 
     await apiFetch("/cases");
@@ -68,9 +66,7 @@ describe("401 interceptor", () => {
   it("does NOT redirect on 401 from an /auth/ endpoint", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response("Unauthorized", { status: 401 }),
-      ),
+      vi.fn().mockResolvedValue(new Response("Unauthorized", { status: 401 })),
     );
 
     await apiFetch("/auth/config");
@@ -78,12 +74,7 @@ describe("401 interceptor", () => {
   });
 
   it("does NOT redirect on non-401 error responses", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(
-        new Response("Forbidden", { status: 403 }),
-      ),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("Forbidden", { status: 403 })));
 
     await apiFetch("/cases");
     expect(window.location.href).toBe("");
@@ -92,9 +83,7 @@ describe("401 interceptor", () => {
   it("redirects to /login on 401 from request<T> (used by apiClient)", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response("Unauthorized", { status: 401 }),
-      ),
+      vi.fn().mockResolvedValue(new Response("Unauthorized", { status: 401 })),
     );
 
     // apiClient.health uses request<T> internally; the 401 redirect should

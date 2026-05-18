@@ -145,7 +145,9 @@ describe("RelationshipCreateModal", () => {
       const opts = document.querySelectorAll("[data-combobox-option][value='ent-aaa']");
       expect(opts.length).toBeGreaterThan(0);
     });
-    await user.click(document.querySelector("[data-combobox-option][value='ent-aaa']") as HTMLElement);
+    await user.click(
+      document.querySelector("[data-combobox-option][value='ent-aaa']") as HTMLElement,
+    );
 
     // Select the same entity (ent-aaa) as destination
     await user.click(dstInput);

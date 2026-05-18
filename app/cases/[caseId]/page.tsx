@@ -72,7 +72,7 @@ function CaseDetailContent({ caseId }: CaseDetailContentProps) {
     setEntities(updated);
   }, []);
 
-  function handlePluginRunSuccess(_result: PluginRunResponse) {
+  function handlePluginRunSuccess(_: PluginRunResponse) {
     setRefreshToken((t) => t + 1);
   }
 

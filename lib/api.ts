@@ -109,11 +109,7 @@ export async function apiResetPassword(token: string, password: string): Promise
  * Only runs in the browser — SSR requests skip the redirect.
  */
 function handle401(status: number, path: string): void {
-  if (
-    status === 401 &&
-    !path.startsWith("/auth/") &&
-    typeof window !== "undefined"
-  ) {
+  if (status === 401 && !path.startsWith("/auth/") && typeof window !== "undefined") {
     window.location.href = "/login";
   }
 }

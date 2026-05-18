@@ -342,27 +342,27 @@ export function EntityDetailDrawer({
 
             {/* Applicable plugins — only shown outside edit mode when at least one plugin matches */}
             {!editMode && applicablePlugins.length > 0 && (
-                <>
-                  <Divider />
-                  <Stack gap="xs">
-                    <Text size="xs" c="dimmed" fw={500}>
-                      Run plugin
-                    </Text>
-                    {applicablePlugins.map((p) => (
-                        <Button
-                          key={p.name}
-                          variant="light"
-                          color="violet"
-                          size="xs"
-                          leftSection={<IconPlayerPlay size={13} />}
-                          onClick={() => setRunModalPlugin(p)}
-                        >
-                          {p.name}@{p.version}
-                        </Button>
-                      ))}
-                  </Stack>
-                </>
-              )}
+              <>
+                <Divider />
+                <Stack gap="xs">
+                  <Text size="xs" c="dimmed" fw={500}>
+                    Run plugin
+                  </Text>
+                  {applicablePlugins.map((p) => (
+                    <Button
+                      key={p.name}
+                      variant="light"
+                      color="violet"
+                      size="xs"
+                      leftSection={<IconPlayerPlay size={13} />}
+                      onClick={() => setRunModalPlugin(p)}
+                    >
+                      {p.name}@{p.version}
+                    </Button>
+                  ))}
+                </Stack>
+              </>
+            )}
 
             <Divider />
 
