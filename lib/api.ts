@@ -103,6 +103,21 @@ export async function apiResetPassword(token: string, password: string): Promise
   }
 }
 
+/**
+ * Redirect to /login on 401 responses, unless the request itself targets
+ * an auth endpoint (avoids redirect loops on /auth/login, /auth/register, etc.).
+ * Only runs in the browser — SSR requests skip the redirect.
+ */
+function handle401(status: number, path: string): void {
+  if (
+    status === 401 &&
+    !path.startsWith("/auth/") &&
+    typeof window !== "undefined"
+  ) {
+    window.location.href = "/login";
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${getApiBaseUrl()}${path}`, {
     credentials: "include",
@@ -112,6 +127,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       ...(init?.headers ?? {}),
     },
   });
+  handle401(res.status, path);
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`API ${res.status}: ${body.slice(0, 200)}`);
@@ -129,7 +145,7 @@ export const apiClient = {
  * Returns the raw Response so callers can check status codes.
  */
 export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
-  return fetch(`${getApiBaseUrl()}${path}`, {
+  const res = await fetch(`${getApiBaseUrl()}${path}`, {
     credentials: "include",
     ...init,
     headers: {
@@ -137,6 +153,8 @@ export async function apiFetch(path: string, init?: RequestInit): Promise<Respon
       ...(init?.headers ?? {}),
     },
   });
+  handle401(res.status, path);
+  return res;
 }
 
 /**
