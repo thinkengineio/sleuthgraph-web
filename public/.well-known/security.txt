@@ -1,0 +1,6 @@
+Contact: mailto:security@sleuthgraph.io
+Expires: 2027-05-24T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://sleuthgraph.io/.well-known/security.txt
+Canonical: https://app.sleuthgraph.io/.well-known/security.txt
+Policy: https://github.com/thinkengineio/sleuthgraph/blob/main/SECURITY.md

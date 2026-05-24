@@ -10,8 +10,9 @@
 
 **Please do NOT open public issues for security vulnerabilities.**
 
-Instead, report vulnerabilities by emailing **security@sleuthgraph.io** or by using
-[GitHub's private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability).
+Instead, report vulnerabilities by emailing **security@sleuthgraph.io** or by
+opening a [private security advisory](https://github.com/thinkengineio/sleuthgraph-web/security/advisories/new)
+on this repository.
 
 ### What to expect
 
