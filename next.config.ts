@@ -10,11 +10,13 @@ import type { NextConfig } from "next";
  *    inline styles (CSS-in-JS via emotion-style runtime).
  *  - No `fonts.googleapis.com` / `fonts.gstatic.com` needed: `next/font/google`
  *    self-hosts Geist + Geist Mono at build time, so fonts are served from `'self'`.
- *  - `connect-src` only allows `'self'` plus the API origin. The same-origin
- *    `localhost:8000` dev fallback in `lib/api.ts` is covered by `'self'` when
- *    behind a reverse proxy; in pure dev (`pnpm dev` on :3000 → :8000) browsers
- *    will block the cross-origin call regardless of CSP because the API host
- *    isn't `'self'`. Override `NEXT_PUBLIC_API_URL` for dev work that needs it.
+ *  - `connect-src` only allows `'self'` plus the API origin. In production behind
+ *    a reverse proxy that fronts both app and api under the same origin, `'self'`
+ *    covers the api fetch. In pure dev (`pnpm dev` on :3000 calling api at :8000),
+ *    `'self'` resolves to `localhost:3000` only, so CSP itself blocks the request
+ *    to `localhost:8000` (different port = different origin). Set
+ *    `NEXT_PUBLIC_API_URL` to a same-origin proxied path, or temporarily relax
+ *    `connect-src` in dev. Tracked as a follow-up to gate CSP on `NODE_ENV`.
  *  - No `img-src` `data:` / `blob:` removal: Mantine icons + drag/drop preview
  *    rely on both.
  */
