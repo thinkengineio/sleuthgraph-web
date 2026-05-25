@@ -116,4 +116,4 @@ This version has breaking changes; APIs, conventions, and file structure may all
 
 ---
 
-*Last updated: 2026-05-25. This file changes occasionally, re-read at the start of every session.*
+_Last updated: 2026-05-25. This file changes occasionally, re-read at the start of every session._
